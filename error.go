@@ -20,7 +20,8 @@ func (e *Error) Error() string {
 }
 
 func checkError(err C.ORT_Error) *Error {
-	if C.GoString(err.message) != "" {
+	if err.message != nil {
+		defer C.free(unsafe.Pointer(err.message))
 		return &Error{
 			message: C.GoString(err.message),
 		}
@@ -34,7 +35,11 @@ func HasError() bool {
 }
 
 func GetErrorString() string {
-	return C.GoString(C.ORT_GetErrorString())
+	msg := C.ORT_GetErrorString()
+	if msg == nil {
+		return ""
+	}
+	return C.GoString(msg)
 }
 
 func ResetError() {
@@ -51,9 +56,9 @@ func GetError() error {
 }
 
 func PanicOnError() {
-	msg := C.GoString(C.ORT_GetErrorString())
-	if msg == "" {
+	msg := C.ORT_GetErrorString()
+	if msg == nil {
 		return
 	}
-	panic(msg)
+	panic(C.GoString(msg))
 }

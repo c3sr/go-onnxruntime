@@ -12,20 +12,23 @@
 
 #define HANDLE_ORT_ERRORS(errVar)      \
   try {                                \
-    errVar.message = ""
+    if (errVar.message != nullptr) {   \
+      free(errVar.message);            \
+    }                                  \
+    errVar.message = nullptr
 
 
 #define END_HANDLE_ORT_ERRORS(errVar, retVal)                    \
   }                                                              \
-  catch (const onnxruntime::OnnxRuntimeException &e) {          \
+  catch (const onnxruntime::OnnxRuntimeException &e) {           \
     auto msg = e.what();                                         \
     std::cout << "Onnxruntime Exception msg = " << msg << "\n";  \
-    errVar.message = msg;                                        \
+    errVar.message = strdup(msg);                                \
   }                                                              \
   catch (const std::exception &e) {                              \
     auto msg = e.what();                                         \
     std::cout << "Std Exception msg = " << msg << "\n";          \
-    errVar.message = msg;                                        \
+    errVar.message = strdup(msg);                                \
   }                                                              \
   return retVal
 

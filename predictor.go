@@ -87,9 +87,7 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 		return errors.New("input nil or empty")
 	}
 
-	inputsLength := len(inputs)
-
-	for i, input := range inputs {
+	for _, input := range inputs {
 		dense, ok := input.(*tensor.Dense)
 		if !ok {
 			return errors.New("expecting a dense tensor")
@@ -102,19 +100,20 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		defer func() {
-			start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
+			pp.Println("Remember to resume parsing profiler.")
+			// start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
-			profBuffer, err := p.ReadProfile()
-			if err != nil {
-				pp.Println(err)
-				return
-			}
-			t, err := NewTrace(profBuffer, start_time)
-			if err != nil {
-				panic(err)
-				return
-			}
-			t.Publish(ctx, tracer.FRAMEWORK_TRACE)
+			// profBuffer, err := p.ReadProfile()
+			// if err != nil {
+			// 	pp.Println(err)
+			// 	return
+			// }
+			// t, err := NewTrace(profBuffer, start_time)
+			// if err != nil {
+			// 	panic(err)
+			// 	return
+			// }
+			// t.Publish(ctx, tracer.FRAMEWORK_TRACE)
 		}()
 	}
 
@@ -123,36 +122,36 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 		return err
 	}
 
-	C.ORT_PredictorRun(p.ctx, C.int(inputsLength))
+	C.ORT_PredictorRun(p.ctx)
 
 	p.cuptiClose()
 
 	return GetError()
 }
 
-func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]tensor.Tensor, error) {
-	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_predicted_output")
-	defer span.Finish()
+// func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]tensor.Tensor, error) {
+// 	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_predicted_output")
+// 	defer span.Finish()
 
-	cNumOutputs := int(C.Torch_PredictorNumOutputs(p.ctx))
-	if cNumOutputs == 0 {
-		return nil, errors.New("zero number of tensors")
-	}
+// 	cNumOutputs := int(C.Torch_PredictorNumOutputs(p.ctx))
+// 	if cNumOutputs == 0 {
+// 		return nil, errors.New("zero number of tensors")
+// 	}
 
-	// 	cPredictions := C.Torch_PredictorGetOutput(p.ctx)
-	// 	defer C.Torch_IValueDelete(cPredictions)
+// 	// 	cPredictions := C.Torch_PredictorGetOutput(p.ctx)
+// 	// 	defer C.Torch_IValueDelete(cPredictions)
 
-	// 	if cPredictions.itype == C.Torch_IValueTypeUnknown {
-	// 		return nil, errors.New("empty predictions")
-	// 	}
+// 	// 	if cPredictions.itype == C.Torch_IValueTypeUnknown {
+// 	// 		return nil, errors.New("empty predictions")
+// 	// 	}
 
-	// 	res := ivalueToTensor(cPredictions)
-	if err := GetError(); err != nil {
-		return nil, err
-	}
+// 	// 	res := ivalueToTensor(cPredictions)
+// 	if err := GetError(); err != nil {
+// 		return nil, err
+// 	}
 
-	return res, nil
-}
+// 	return res, nil
+// }
 
 func (p *Predictor) Close() {
 	if p == nil {

@@ -27,7 +27,6 @@ var types = []struct {
 	{reflect.TypeOf(int64(0)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64},
 	{reflect.TypeOf(string("")), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING},
 	{reflect.TypeOf(bool(false)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL},
-	{reflect.TypeOf(float16(0)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16},
 	{reflect.TypeOf(float64(0)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE},
 	{reflect.TypeOf(uint32(0)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32},
 	{reflect.TypeOf(uint64(0)), C.ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64},

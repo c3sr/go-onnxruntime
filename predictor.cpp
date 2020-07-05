@@ -252,9 +252,6 @@ void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
       (predictor -> input_).emplace_back(Ort::Value::CreateTensor<int64_t>(memory_info, static_cast<int64_t*>(input) , size, dims.data(), dims.size()));
     break;
-    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
-      (predictor -> input_).emplace_back(Ort::Value::CreateTensor<string>(memory_info, static_cast<string*>(input) , size, dims.data(), dims.size()));
-    break;
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
       (predictor -> input_).emplace_back(Ort::Value::CreateTensor<bool>(memory_info, static_cast<bool*>(input) , size, dims.data(), dims.size()));
     break;
@@ -267,7 +264,7 @@ void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
       (predictor -> input_).emplace_back(Ort::Value::CreateTensor<uint64_t>(memory_info, static_cast<uint64_t*>(input) , size, dims.data(), dims.size()));
     break;
-    default: // c++: FLOAT16, onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16
+    default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
       throw std::runtime_error(std::string("unsupported data type detected in ORT_AddInput."));
   }
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());

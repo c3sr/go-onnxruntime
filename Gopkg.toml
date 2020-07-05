@@ -57,12 +57,24 @@
   name = "github.com/rai-project/tracer"
 
 [[constraint]]
+	branch = "master"
+  name = "github.com/rai-project/go-cupti"
+
+[[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.2.0"
 
 [[constraint]]
   name = "gorgonia.org/tensor"
   version = "0.9.0-beta"
+
+[[override]]
+  name = "gonum.org/v1/gonum"
+  version = "=0.6.0"
+
+[[override]]
+  name = "github.com/k0kubun/pp"
+  version = "3.0.1"
 
 [prune]
   go-tests = true
