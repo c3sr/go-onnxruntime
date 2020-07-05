@@ -98,6 +98,14 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:9f42202ac457c462ad8bb9642806d275af9ab4850cf0b1960b9c6f083d4a309a"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "T"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:9a023ac8c30a6871d3fc94c9c0b5a0639ede096c351fd6cdcd7268fe9cb95af2"
   name = "github.com/facebookgo/stack"
@@ -436,6 +444,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:9fff0a2812257495385ebc6f7ce1d8bc6cae69f585f2904fbd135a440f6eacab"
+  name = "github.com/rai-project/machine"
+  packages = ["os"]
+  pruneopts = "T"
+  revision = "16d40a8bc810dd4bda476f87f15607effddedb84"
+
+[[projects]]
+  branch = "master"
   digest = "1:266150b2920db612678097e72ae47888152d29d3723a80bd5dd15c400bea6784"
   name = "github.com/rai-project/nvidia-smi"
   packages = ["."]
@@ -464,8 +480,12 @@
   name = "github.com/rai-project/tracer"
   packages = [
     ".",
+    "all",
     "defaults",
+    "jaeger",
+    "noop",
     "observer",
+    "utils",
   ]
   pruneopts = "T"
   revision = "97d6a9677dc3a0e73fc9df74d366323884c19190"
@@ -477,6 +497,14 @@
   packages = ["."]
   pruneopts = "T"
   revision = "addd4cf1893f82eadf3982b92dec25f87d0453e2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e2a04242aae3d6797e66319593ab408af4eef437c31fa57f0916b50f6860e4d7"
+  name = "github.com/rai-project/uuid"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "2a4c8b922cc6a17bd16f236d4bb06134972289f2"
 
 [[projects]]
   branch = "master"
@@ -582,7 +610,9 @@
     "thrift-gen/jaeger",
     "thrift-gen/sampling",
     "thrift-gen/zipkincore",
+    "transport/zipkin",
     "utils",
+    "zipkin",
   ]
   pruneopts = "T"
   revision = "66c008c3d6ad856cac92a0af53186efbffa8e6a5"
@@ -896,6 +926,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/GeertJohan/go-sourcepath",
     "github.com/Unknwon/com",
     "github.com/benesch/cgosymbolizer",
     "github.com/k0kubun/pp",
@@ -906,6 +937,7 @@
     "github.com/rai-project/logger",
     "github.com/rai-project/nvidia-smi",
     "github.com/rai-project/tracer",
+    "github.com/rai-project/tracer/all",
     "github.com/sirupsen/logrus",
     "gorgonia.org/tensor",
   ]

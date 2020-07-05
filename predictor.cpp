@@ -55,8 +55,6 @@ struct Predictor {
   int64_t profile_start_;
   std::vector<const char*> input_node_;
   std::vector<Ort::Value> input_;
-  std::vector<ONNXTensorElementDataType> input_type_;
-  std::vector<std::vector<int64_t>> input_dims_;
   std::vector<const char*> output_node_;
   std::vector<Ort::Value> output_;
 };
@@ -75,11 +73,8 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
 
   for (size_t i = 0; i < num_input_nodes; i++) {
     // get input node names and dimensions
-    input_node_.emplace_back(session_.GetInputName(i, allocator_));
+    input_node_.push_back(session_.GetInputName(i, allocator_));
     std::cout << "Input " << i << " : name = " << input_node_[i] << "\n";
-    auto tensor_info = session_.GetInputTypeInfo(i).GetTensorTypeAndShapeInfo();
-    input_dims_.emplace_back(tensor_info.GetShape());
-    input_type_.emplace_back(tensor_info.GetElementType());
   }
 
   // get output info
@@ -87,7 +82,7 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
 
   for (size_t i = 0; i < num_output_nodes; i++) {
     // get output node names
-    output_node_.emplace_back(session_.GetOutputName(i, allocator_));
+    output_node_.push_back(session_.GetOutputName(i, allocator_));
     std::cout << "Output " << i << " : name = " << output_node_[i] << "\n";
   }
 
@@ -99,28 +94,6 @@ void Predictor::Predict(void) {
   // check invalid dims size
   if (input_.size() != input_node_.size()) {
     throw std::runtime_error(std::string("Invalid number of input tensor in Predictor::Predict."));
-  }
-
-  // check invalid dims
-  for (size_t i = 0; i < input_.size(); i++) {
-    auto tensor_info = input_[i].GetTensorTypeAndShapeInfo();
-    auto type = tensor_info.GetElementType();
-    if(type != input_type_[i]) {
-      throw std::runtime_error(std::string("Invalid type of input tensor in Predictor::Predict."));
-    }
-
-    auto dims = tensor_info.GetShape();
-
-    if (dims.size() != input_dims_[i].size()) {
-      throw std::runtime_error(std::string("Invalid dimension size of input tensor in Predictor::Predict."));
-    }
-
-    for (size_t j = 0; j < dims.size(); j++) {
-      // handle symbolic dimension, which is negative(-1)
-      if (input_dims_[i][j] >= 0 && input_dims_[i][j] != dims[j]) {
-        throw std::runtime_error(std::string("Invalid dimensions of input tensor in Predictor::Predict."));
-      }
-    }
   }
 
   output_ = session_.Run(Ort::RunOptions{nullptr}, input_node_.data(), input_.data(),
