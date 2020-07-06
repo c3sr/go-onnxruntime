@@ -17,6 +17,9 @@
 
 using std::string;
 
+/* Description: The structure to handle the predictor for onnxruntime
+ * Note: Call ConvertOutput before you want to read the outputs
+ */ 
 // TODO:ADD GPU
 struct Predictor {
   Predictor(const string &model_file, ORT_DeviceKind device);
@@ -93,6 +96,7 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
 
 }
 
+/* Description: Destructor of the predictor to clean up dynamic allocated momory */
 Predictor::~Predictor() {
   for(size_t i = 0; i < converted_output_.size(); i++) {
     free(converted_output_[i].data_ptr);
@@ -102,6 +106,7 @@ Predictor::~Predictor() {
   }
 }
 
+/* Description: Do the inference in onnxruntime */
 void Predictor::Predict(void) {
   // check invalid dims size
   if (input_.size() != input_node_.size()) {
@@ -115,6 +120,7 @@ void Predictor::Predict(void) {
 
 }
 
+/* Description: Convert Ort::Value to an array pointed by the pointer */
 void *Predictor::ConvertTensorToPointer(Ort::Value& value, size_t size) {
   void *res = nullptr;
   switch (value.GetTensorTypeAndShapeInfo().GetElementType()) {
@@ -171,6 +177,9 @@ void *Predictor::ConvertTensorToPointer(Ort::Value& value, size_t size) {
   return res;
 }
 
+/* Description: The helper function when calling ConvertOutput for converting all outputs into array form
+ *              Since Ort::Value can be a tensor, a map or a sequence, we need to decompose it by recursion
+ */
 void Predictor::AddOutput(Ort::Value& value) {
   // base case
   if (value.IsTensor()) {
@@ -191,8 +200,7 @@ void Predictor::AddOutput(Ort::Value& value) {
     return;
   }
   
-  // need to be decomposed
-   
+  // need to be decomposed, it is a map or a sequence, both can be done in the same way
   size_t length = value.GetCount();
 
   for (size_t i = 0; i < length; i++) {
@@ -201,12 +209,14 @@ void Predictor::AddOutput(Ort::Value& value) {
   }
 }
 
+/* Description: The function need to be called before reading outputs from Go */
 void Predictor::ConvertOutput(void) {
   for (size_t i = 0; i < output_.size(); i++) {
     AddOutput(output_[i]);
   }
 }
 
+/* Description: The interface for Go to create a new predictor */
 ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   const auto ctx = new Predictor(model_file, device);
@@ -214,6 +224,7 @@ ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind dev
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, (ORT_PredictorContext) nullptr);
 }
 
+/* Description: The interface for Go to do inference */
 void ORT_PredictorRun(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -224,6 +235,7 @@ void ORT_PredictorRun(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
+/* Description: The interface for Go to convert outputs before reading outputs */
 void ORT_PredictorConvertOutput(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -236,6 +248,7 @@ void ORT_PredictorConvertOutput(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
+/* Description: The interface for Go to know the number of converted outputs */
 int ORT_PredictorNumOutputs(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -246,6 +259,7 @@ int ORT_PredictorNumOutputs(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, 0);
 }
 
+/* Description: The interface for Go to get the number of converted outputs */
 ORT_Value ORT_PredictorGetOutput(ORT_PredictorContext pred, int index) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -258,6 +272,9 @@ ORT_Value ORT_PredictorGetOutput(ORT_PredictorContext pred, int index) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, ORT_Value{});
 }
 
+/* Description: The interface for Go to delete the dynamic allocated predictor
+ *              The destructor for the predictor will be called when deleting the predictor
+ */
 void ORT_PredictorDelete(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -268,6 +285,7 @@ void ORT_PredictorDelete(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
+/* Description: The interface for Go to read the profile in framework level from onnxruntime */
 char *ORT_ProfilingRead(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -283,6 +301,7 @@ char *ORT_ProfilingRead(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, strdup(""));
 }
 
+/* Description: The interface for Go to get the start time of the profiler */
 int64_t ORT_ProfilingGetStartTime(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
   auto predictor = (Predictor *)pred;
@@ -294,6 +313,7 @@ int64_t ORT_ProfilingGetStartTime(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, -1);
 }
 
+/* Description: The interface for Go to add inputs into the predictor */
 void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
                   int n_dim, ONNXTensorElementDataType dtype) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);

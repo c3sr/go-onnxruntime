@@ -3,7 +3,7 @@
 
 #include <exceptions.h>
 
-/* Description: try and catch MACROS used for C++ functions
+/* Description: try and catch MACROS used for C++ functions, adapted from go-pytorch
  * Referenced: 
  * https://github.com/rai-project/go-pytorch/blob/master/cbits/error.hpp
  * https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/common/exceptions.h

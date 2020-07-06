@@ -77,4 +77,4 @@ Examples of using the Go Onnxruntime binding to do model inference are under [ex
 
 ## Credits
 
-The logic of conversion between Go types and Ort::Values is borrowed from [go-pytorch](https://github.com/rai-project/go-pytorch).
+Some of the logic of conversion between Go types and Ort::Values is borrowed from [go-pytorch](https://github.com/rai-project/go-pytorch).

@@ -101,8 +101,10 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		defer func() {
 			pp.Println("Remember to resume parsing profiler.")
+			// TODO: add trace.go
 			// start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
+			// Note: The pointer from C is already freed in p.ReadProfile()
 			// profBuffer, err := p.ReadProfile()
 			// if err != nil {
 			// 	pp.Println(err)
@@ -121,10 +123,9 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	if err != nil {
 		return err
 	}
+	defer p.cuptiClose()
 
 	C.ORT_PredictorRun(p.ctx)
-
-	p.cuptiClose()
 
 	return GetError()
 }

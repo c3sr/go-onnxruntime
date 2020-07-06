@@ -13,7 +13,6 @@ import (
  * Reference: https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/session/onnxruntime_c_api.h
  * Note: Currently, Ort doesn't support complex64, complex128, bfloat16 types
  */
-
 var types = []struct {
 	typ      reflect.Type
 	dataType C.ONNXTensorElementDataType

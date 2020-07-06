@@ -2,13 +2,16 @@ package onnxruntime
 
 // #include "cbits/predictor.hpp"
 // #include <stdlib.h>
-//
 import "C"
 import (
 	"unsafe"
 
 	"github.com/pkg/errors"
 )
+
+/* Description: The interface for getting errors thrown by C++.
+ * Referenced: https://github.com/rai-project/go-pytorch/blob/master/errors.go
+ */
 
 // Error returned by C++
 type Error struct {

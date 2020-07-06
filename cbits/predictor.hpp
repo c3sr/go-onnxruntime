@@ -24,7 +24,7 @@ extern "C" {
   typedef void* ORT_PredictorContext;
   typedef void* ORT_TensorContext;
 
-  // Predictor + Profiling
+  // Predictor + Profiling interface for Go
 
   ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device);
 
@@ -45,7 +45,8 @@ extern "C" {
   void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
                     int n_dim, ONNXTensorElementDataType dtype);
 
-  // Error
+  // Error interface for Go
+
   int ORT_HasError();
 
   const char* ORT_GetErrorString();
@@ -55,6 +56,5 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */
-
 
 #endif /* __PREDICTOR_HPP__ */
