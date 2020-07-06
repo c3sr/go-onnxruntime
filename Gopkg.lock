@@ -397,6 +397,14 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:22aa691fe0213cb5c07d103f9effebcb7ad04bee45a0ce5fe5369d0ca2ec3a1f"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "T"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:8edbafe83ca2d8e80d592a3381a54bf00378fe1255aa9d94ebacef46094d5b07"
   name = "github.com/rai-project/config"
@@ -586,6 +594,14 @@
   ]
   pruneopts = "T"
   revision = "13df72109047b6ae9c907bce81e327265d6d8a9c"
+
+[[projects]]
+  digest = "1:6a79618a4d87b0b52aaa139d7beb1ce2a415d924e5468c0f21e286f77f2f1d1c"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "T"
+  revision = "f654a9112bbeac49ca2cd45bfbe11533c4666cf8"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:12688aaba599584071471d6533fa5d5af119b66cc2a075a640042e4c4d983db3"
@@ -893,6 +909,14 @@
   version = "v2.3.0"
 
 [[projects]]
+  branch = "v3"
+  digest = "1:229cb0f6192914f518cc1241ede6d6f1f458b31debfa18bf3a5c9e4f7b01e24b"
+  name = "gopkg.in/yaml.v3"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "eeeca48fe7764f320e4870d231902bf9c1be2c08"
+
+[[projects]]
   digest = "1:07583a0e780f2650a40807b05a8c7fd57189312429e76a4be741c8573a285012"
   name = "gorgonia.org/tensor"
   packages = [
@@ -939,6 +963,7 @@
     "github.com/rai-project/tracer",
     "github.com/rai-project/tracer/all",
     "github.com/sirupsen/logrus",
+    "github.com/stretchr/testify/assert",
     "gorgonia.org/tensor",
   ]
   solver-name = "gps-cdcl"

@@ -7,6 +7,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cstring>
+#include <cstdlib>
 #include <onnxruntime_cxx_api.h>
 
 #ifdef ORT_WITH_GPU
@@ -18,7 +20,11 @@ using std::string;
 // TODO:ADD GPU
 struct Predictor {
   Predictor(const string &model_file, ORT_DeviceKind device);
+  ~Predictor();
   void Predict(void);
+  void ConvertOutput(void);
+  void AddOutput(Ort::Value&);
+  void *ConvertTensorToPointer(Ort::Value&, size_t);
   struct Onnxruntime_Env {
     Ort::Env env_;
     Ort::SessionOptions session_options_;
@@ -57,6 +63,7 @@ struct Predictor {
   std::vector<Ort::Value> input_;
   std::vector<const char*> output_node_;
   std::vector<Ort::Value> output_;
+  std::vector<ORT_Value> converted_output_;
 };
 
 
@@ -74,7 +81,6 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
   for (size_t i = 0; i < num_input_nodes; i++) {
     // get input node names and dimensions
     input_node_.push_back(session_.GetInputName(i, allocator_));
-    std::cout << "Input " << i << " : name = " << input_node_[i] << "\n";
   }
 
   // get output info
@@ -83,14 +89,20 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
   for (size_t i = 0; i < num_output_nodes; i++) {
     // get output node names
     output_node_.push_back(session_.GetOutputName(i, allocator_));
-    std::cout << "Output " << i << " : name = " << output_node_[i] << "\n";
   }
 
 }
 
-void Predictor::Predict(void) {
-  HANDLE_ORT_ERRORS(ORT_GlobalError);
+Predictor::~Predictor() {
+  for(size_t i = 0; i < converted_output_.size(); i++) {
+    free(converted_output_[i].data_ptr);
+    free((void*) converted_output_[i].shape_ptr);
+    converted_output_[i].data_ptr = nullptr;
+    converted_output_[i].shape_ptr = nullptr;
+  }
+}
 
+void Predictor::Predict(void) {
   // check invalid dims size
   if (input_.size() != input_node_.size()) {
     throw std::runtime_error(std::string("Invalid number of input tensor in Predictor::Predict."));
@@ -101,7 +113,98 @@ void Predictor::Predict(void) {
 
   profile_filename_ = session_.EndProfiling(allocator_);
 
-  END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
+}
+
+void *Predictor::ConvertTensorToPointer(Ort::Value& value, size_t size) {
+  void *res = nullptr;
+  switch (value.GetTensorTypeAndShapeInfo().GetElementType()) {
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UNDEFINED:
+      throw std::runtime_error(std::string("undefined data type detected in ConvertTensorToPointer."));
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT:
+      res = (void*) malloc(sizeof(float) * size);
+      memcpy(res, value.GetTensorMutableData<float>(), sizeof(float) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8:
+      res = (void*) malloc(sizeof(uint8_t) * size);
+      memcpy(res, value.GetTensorMutableData<uint8_t>(), sizeof(uint8_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8:
+      res = (void*) malloc(sizeof(int8_t) * size);
+      memcpy(res, value.GetTensorMutableData<int8_t>(), sizeof(int8_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16:
+      res = (void*) malloc(sizeof(uint16_t) * size);
+      memcpy(res, value.GetTensorMutableData<uint16_t>(), sizeof(uint16_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16:
+      res = (void*) malloc(sizeof(int16_t) * size);
+      memcpy(res, value.GetTensorMutableData<int16_t>(), sizeof(int16_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32:
+      res = (void*) malloc(sizeof(int32_t) * size);
+      memcpy(res, value.GetTensorMutableData<int32_t>(), sizeof(int32_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64:
+      res = (void*) malloc(sizeof(int64_t) * size);
+      memcpy(res, value.GetTensorMutableData<int64_t>(), sizeof(int64_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL:
+      res = (void*) malloc(sizeof(bool) * size);
+      memcpy(res, value.GetTensorMutableData<bool>(), sizeof(bool) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE:
+      res = (void*) malloc(sizeof(double) * size);
+      memcpy(res, value.GetTensorMutableData<double>(), sizeof(double) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32:
+      res = (void*) malloc(sizeof(uint32_t) * size);
+      memcpy(res, value.GetTensorMutableData<uint32_t>(), sizeof(uint32_t) * size);
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
+      res = (void*) malloc(sizeof(uint64_t) * size);
+      memcpy(res, value.GetTensorMutableData<uint64_t>(), sizeof(uint64_t) * size);
+    break;
+    default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
+      throw std::runtime_error(std::string("unsupported data type detected in Predictor::ConvertTensorToPointer."));
+  }
+  return res;
+}
+
+void Predictor::AddOutput(Ort::Value& value) {
+  // base case
+  if (value.IsTensor()) {
+    auto tensor_info = value.GetTensorTypeAndShapeInfo();
+    auto dims = tensor_info.GetShape();
+    int64_t *shapes = (int64_t*) malloc(sizeof(int64_t) * dims.size());
+    size_t size = 1;
+    for (size_t i = 0; i < dims.size(); i++) {
+      size *= dims[i];
+      shapes[i] = dims[i];
+    }
+    converted_output_.push_back(ORT_Value{
+      .otype = tensor_info.GetElementType(),
+      .data_ptr = ConvertTensorToPointer(value, size),
+      .shape_ptr = shapes,
+      .shape_len = dims.size()
+    });
+    return;
+  }
+  
+  // need to be decomposed
+   
+  size_t length = value.GetCount();
+
+  for (size_t i = 0; i < length; i++) {
+    auto cur_val = value.GetValue(static_cast<int>(i), allocator_);
+    AddOutput(cur_val);
+  }
+}
+
+void Predictor::ConvertOutput(void) {
+  for (size_t i = 0; i < output_.size(); i++) {
+    AddOutput(output_[i]);
+  }
 }
 
 ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device) {
@@ -121,34 +224,39 @@ void ORT_PredictorRun(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
-// int Torch_PredictorNumOutputs(Torch_PredictorContext pred) {
-//   HANDLE_TH_ERRORS(Torch_GlobalError);
-//   auto predictor = (Predictor *)pred;
-//   if (predictor == nullptr) {
-//     return 0;
-//   }
-//   if (predictor->output_.isTensor()) {
-//     return 1;
-//   }
-//   if (predictor->output_.isTuple()) {
-//     return predictor->output_.toTuple()->elements().size();
-//   }
+void ORT_PredictorConvertOutput(ORT_PredictorContext pred) {
+  HANDLE_ORT_ERRORS(ORT_GlobalError);
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorConvertOutput."));
+  }
 
-//   return 0;
-//   END_HANDLE_TH_ERRORS(Torch_GlobalError, 0);
-// }
+  predictor -> ConvertOutput();
 
-// Torch_IValue Torch_PredictorGetOutput(Torch_PredictorContext pred) {
-//   HANDLE_TH_ERRORS(Torch_GlobalError);
-//   auto predictor = (Predictor *)pred;
-//   if (predictor == nullptr) {
-//     return Torch_IValue{};
-//   }
+  END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
+}
 
-//   return Torch_ConvertIValueToTorchIValue(predictor->output_);
+int ORT_PredictorNumOutputs(ORT_PredictorContext pred) {
+  HANDLE_ORT_ERRORS(ORT_GlobalError);
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorNumOutputs."));
+  }
+  return (int) ((predictor -> converted_output_).size());
+  END_HANDLE_ORT_ERRORS(ORT_GlobalError, 0);
+}
 
-//   END_HANDLE_TH_ERRORS(Torch_GlobalError, Torch_IValue{});
-// }
+ORT_Value ORT_PredictorGetOutput(ORT_PredictorContext pred, int index) {
+  HANDLE_ORT_ERRORS(ORT_GlobalError);
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorGetOutput."));
+  }
+
+  return (predictor -> converted_output_)[index];
+
+  END_HANDLE_ORT_ERRORS(ORT_GlobalError, ORT_Value{});
+}
 
 void ORT_PredictorDelete(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);

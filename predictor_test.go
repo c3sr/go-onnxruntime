@@ -11,6 +11,7 @@ import (
 	"github.com/rai-project/dlframework/framework/options"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
 	_ "github.com/rai-project/tracer/all"
+	"github.com/stretchr/testify/assert"
 	gotensor "gorgonia.org/tensor"
 )
 
@@ -72,6 +73,20 @@ func TestOnnxruntimePredictor(t *testing.T) {
 	if err != nil {
 		t.Errorf("Onnxruntime predictor predicting failed %v", err)
 	}
+
+	output, err := predictor.ReadPredictionOutput(ctx)
+
+	if err != nil {
+		t.Errorf("Onnxruntime predictor read prediction output failed %v", err)
+	}
+
+	scores := output[0].Data().([]float32)
+
+	assert.InDelta(t, float32(-1.2268), scores[0], 0.0001)
+	assert.InDelta(t, float32(1.4082), scores[999], 0.0001)
+	assert.InDelta(t, float32(-0.7274), scores[1000], 0.0001)
+	assert.InDelta(t, float32(0.8530), scores[1999], 0.0001)
+	assert.Equal(t, 2000, len(scores))
 }
 
 func TestMain(m *testing.M) {

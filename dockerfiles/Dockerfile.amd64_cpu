@@ -8,17 +8,17 @@ ARG VCS_URL
 ARG VERSION
 ARG ARCH
 ARG FRAMEWORK_VERSION
-LABEL org.carml.go-pytorch.build-date=$BUILD_DATE \
-  org.carml.go-pytorch.name="go-pytorch bindings for go" \
-  org.carml.go-pytorch.description="" \
-  org.carml.go-pytorch.url="https://www.mlmodelscope.org/" \
-  org.carml.go-pytorch.vcs-ref=$VCS_REF \
-  org.carml.go-pytorch.vcs-url=$VCS_URL \
-  org.carml.go-pytorch.vendor="MLModelScope" \
-  org.carml.go-pytorch.arch=$ARCH \
-  org.carml.go-pytorch.version=$VERSION \
-  org.carml.go-pytorch.framework_version=$FRAMEWORK_VERSION \
-  org.carml.go-pytorch.schema-version="1.0"
+LABEL org.carml.go-onnxruntime.build-date=$BUILD_DATE \
+  org.carml.go-onnxruntime.name="go-onnxruntime bindings for go" \
+  org.carml.go-onnxruntime.description="" \
+  org.carml.go-onnxruntime.url="https://www.mlmodelscope.org/" \
+  org.carml.go-onnxruntime.vcs-ref=$VCS_REF \
+  org.carml.go-onnxruntime.vcs-url=$VCS_URL \
+  org.carml.go-onnxruntime.vendor="MLModelScope" \
+  org.carml.go-onnxruntime.arch=$ARCH \
+  org.carml.go-onnxruntime.version=$VERSION \
+  org.carml.go-onnxruntime.framework_version=$FRAMEWORK_VERSION \
+  org.carml.go-onnxruntime.schema-version="1.0"
 
 
 ########## DEPENDENCIES INSTALLATION ###################

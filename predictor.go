@@ -129,29 +129,34 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	return GetError()
 }
 
-// func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]tensor.Tensor, error) {
-// 	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_predicted_output")
-// 	defer span.Finish()
+func (p *Predictor) ReadPredictionOutput(ctx context.Context) ([]tensor.Tensor, error) {
+	defer PanicOnError()
 
-// 	cNumOutputs := int(C.Torch_PredictorNumOutputs(p.ctx))
-// 	if cNumOutputs == 0 {
-// 		return nil, errors.New("zero number of tensors")
-// 	}
+	span, _ := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_read_predicted_output")
+	defer span.Finish()
 
-// 	// 	cPredictions := C.Torch_PredictorGetOutput(p.ctx)
-// 	// 	defer C.Torch_IValueDelete(cPredictions)
+	C.ORT_PredictorConvertOutput(p.ctx)
 
-// 	// 	if cPredictions.itype == C.Torch_IValueTypeUnknown {
-// 	// 		return nil, errors.New("empty predictions")
-// 	// 	}
+	cNumOutputs := int(C.ORT_PredictorNumOutputs(p.ctx))
 
-// 	// 	res := ivalueToTensor(cPredictions)
-// 	if err := GetError(); err != nil {
-// 		return nil, err
-// 	}
+	if cNumOutputs == 0 {
+		return nil, errors.New("zero number of tensors")
+	}
 
-// 	return res, nil
-// }
+	res := make([]tensor.Tensor, cNumOutputs)
+
+	for i := 0; i < cNumOutputs; i++ {
+		cPredictions := C.ORT_PredictorGetOutput(p.ctx, C.int(i))
+		// The allocated memory will be deleted when destructor of predictor in c++ is called
+		res[i] = ortValueToTensor(cPredictions)
+	}
+
+	if err := GetError(); err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
 
 func (p *Predictor) Close() {
 	if p == nil {
