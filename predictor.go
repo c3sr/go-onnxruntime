@@ -100,22 +100,21 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		defer func() {
-			pp.Println("Remember to resume parsing profiler.")
-			// TODO: add trace.go
-			// start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
+			// TODO: fix the incorrect start time
+			start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
 			// Note: The pointer from C is already freed in p.ReadProfile()
-			// profBuffer, err := p.ReadProfile()
-			// if err != nil {
-			// 	pp.Println(err)
-			// 	return
-			// }
-			// t, err := NewTrace(profBuffer, start_time)
-			// if err != nil {
-			// 	panic(err)
-			// 	return
-			// }
-			// t.Publish(ctx, tracer.FRAMEWORK_TRACE)
+			profBuffer, err := p.ReadProfile()
+			if err != nil {
+				pp.Println(err)
+				return
+			}
+			t, err := NewTrace(profBuffer, start_time)
+			if err != nil {
+				panic(err)
+				return
+			}
+			t.Publish(ctx, tracer.FRAMEWORK_TRACE)
 		}()
 	}
 

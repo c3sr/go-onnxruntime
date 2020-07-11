@@ -58,10 +58,11 @@ struct Predictor {
       session_options_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
     }
   } ort_env_;
+  // Order matters when using member initializer lists
+  int64_t profile_start_;
   Ort::Session session_;
   Ort::AllocatorWithDefaultOptions allocator_;
   string profile_filename_;
-  int64_t profile_start_;
   std::vector<const char*> input_node_;
   std::vector<Ort::Value> input_;
   std::vector<const char*> output_node_;
@@ -69,14 +70,14 @@ struct Predictor {
   std::vector<ORT_Value> converted_output_;
 };
 
-
 /* Description: Follow the sample given in onnxruntime to initialize the predictor
  * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
  */
 Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
-  : ort_env_(device), session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
+  : ort_env_(device), 
+    profile_start_(static_cast<int64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count())),
+    session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
   // TODO: find an adequate timestamp
-  profile_start_ = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 
   // get input info
   size_t num_input_nodes = session_.GetInputCount();

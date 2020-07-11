@@ -34,12 +34,28 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:09a914d4a8a0869525d20b83e1b7519686116c5be518f78585fb8fde3bce1ad6"
+  name = "github.com/anthonynsimon/bild"
+  packages = ["parallel"]
+  pruneopts = "T"
+  revision = "35fd1904d43f809ded0959922164885e25577aa2"
+  version = "v0.10.0"
+
+[[projects]]
   branch = "master"
   digest = "1:1237f2e0fe3256bbce813cc1bafddaf26b85bddbd2f8c08c30eb845140198aee"
   name = "github.com/armon/consul-api"
   packages = ["."]
   pruneopts = "T"
   revision = "eb2c6b5be1b66bab83016e0b05f01b8d5496ffbd"
+
+[[projects]]
+  branch = "master"
+  digest = "1:f081f147e8621ff737733640bb0ec1e5c11461f451eb11050b5096d0cb941b0c"
+  name = "github.com/bamiaux/rez"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "29f4463c688b986c11f166b12734f69b58b5555f"
 
 [[projects]]
   branch = "master"
@@ -104,6 +120,14 @@
   pruneopts = "T"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
+
+[[projects]]
+  digest = "1:0ee884203a04fca0e82830e31b767e75e06a2e661bf42f2e7b8384c970309719"
+  name = "github.com/disintegration/imaging"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "acabd8315e63bfcaac97d52d68a7a0b88d2eea93"
+  version = "v1.6.2"
 
 [[projects]]
   branch = "master"
@@ -242,6 +266,14 @@
   packages = ["."]
   pruneopts = "T"
   revision = "6ce5b4c20f3361a04db0c1d838b8d3c0f5552898"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e26f97664fe650ee3d6fda4b9dcbb71d68ebd31730b8403663a19507fccfe2b3"
+  name = "github.com/intel-go/cpuid"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "1a4a6f06a1c643c8fbd339bd61d980960627d09e"
 
 [[projects]]
   digest = "1:e0b019ee3a64ce51eeb7e0097a372305ac8caf338e50adf8e4bf3b7ce928e132"
@@ -414,10 +446,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:a5ebe08e6847dd31098edc13e74c33811e88b02c1784bad53c3f3caf69572e5c"
+  name = "github.com/rai-project/cpu"
+  packages = ["cpuid"]
+  pruneopts = "T"
+  revision = "5bc145cba8e061843bd1e71b6c4450d59578554c"
+
+[[projects]]
+  branch = "master"
   digest = "1:597d9622cb961523f0a1a8ca29fc253fe5058104557665c9239ee6a5f7161279"
   name = "github.com/rai-project/dlframework"
   packages = [
     ".",
+    "framework/feature",
     "framework/options",
   ]
   pruneopts = "T"
@@ -436,11 +477,31 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:3155acc34bff49b119c6c8d4a90f0351d3adfb3ad26bff808e24db6cbc2bc6d2"
+  name = "github.com/rai-project/go-libjpeg"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "c0c10a7e8235277a0a8c62c91bc70688deac5e5a"
+
+[[projects]]
+  branch = "master"
   digest = "1:36786f86751a08b455e0e806333825d36d0ab4f67a5e27a0d76d62ecde52b593"
   name = "github.com/rai-project/godotenv"
   packages = ["."]
   pruneopts = "T"
   revision = "72ca456a35f42d911b5a3f25ef9ea42636a22b3b"
+
+[[projects]]
+  branch = "master"
+  digest = "1:d324ac40cc50b0b5b98d94db9f2f44c714edbd6d143b85b090011d989f7cfa6a"
+  name = "github.com/rai-project/image"
+  packages = [
+    ".",
+    "asm",
+    "types",
+  ]
+  pruneopts = "T"
+  revision = "407d61a969a0c32ee0703e38839828f0b10cdd12"
 
 [[projects]]
   branch = "master"
@@ -702,6 +763,19 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:62eac12bc28f0dfb40eb8b4f36fd98e91bfb9d4d5677737c2d4e9b975c47cddc"
+  name = "golang.org/x/image"
+  packages = [
+    "bmp",
+    "ccitt",
+    "tiff",
+    "tiff/lzw",
+  ]
+  pruneopts = "T"
+  revision = "c13761719519258ff9c1a8b224f63d6e29b63d27"
+
+[[projects]]
+  branch = "master"
   digest = "1:4d588a110bd85e7491952ea7cd3b2b3c8fe1b21d1e95f284a862e1db0fa8fe51"
   name = "golang.org/x/net"
   packages = [
@@ -901,6 +975,17 @@
   version = "v1.57.0"
 
 [[projects]]
+  branch = "v2"
+  digest = "1:fe8f3f85c6b45a792108158fac787bc64aa433ec2b23800e9222a8a7836a66de"
+  name = "gopkg.in/mgo.v2"
+  packages = [
+    "bson",
+    "internal/json",
+  ]
+  pruneopts = "T"
+  revision = "a6b53ec6cb22a3699387a57a161566f9402ee85b"
+
+[[projects]]
   digest = "1:d7f1bd887dc650737a421b872ca883059580e9f8314d601f88025df4f4802dce"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -954,10 +1039,15 @@
     "github.com/Unknwon/com",
     "github.com/benesch/cgosymbolizer",
     "github.com/k0kubun/pp",
+    "github.com/opentracing/opentracing-go",
     "github.com/pkg/errors",
     "github.com/rai-project/config",
+    "github.com/rai-project/dlframework",
+    "github.com/rai-project/dlframework/framework/feature",
     "github.com/rai-project/dlframework/framework/options",
     "github.com/rai-project/go-cupti",
+    "github.com/rai-project/image",
+    "github.com/rai-project/image/types",
     "github.com/rai-project/logger",
     "github.com/rai-project/nvidia-smi",
     "github.com/rai-project/tracer",
