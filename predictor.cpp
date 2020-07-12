@@ -34,7 +34,7 @@ struct Predictor {
     /* Description: Follow the sample given in onnxruntime to initialize the environment
      * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
      */
-    Onnxruntime_Env(ORT_DeviceKind device) : env_(ORT_LOGGING_LEVEL_WARNING, "ort_predict") {
+    Onnxruntime_Env(ORT_DeviceKind device) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
       // Initialize environment, could use ORT_LOGGING_LEVEL_VERBOSE to get more information
       // NOTE: Only one instance of env can exist at any point in time
       
