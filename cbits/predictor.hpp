@@ -28,6 +28,8 @@ extern "C" {
 
   ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device);
 
+  void ORT_PredictorClear(ORT_PredictorContext pred);
+
   void ORT_PredictorRun(ORT_PredictorContext pred);
 
   void ORT_PredictorConvertOutput(ORT_PredictorContext pred);

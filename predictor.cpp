@@ -27,6 +27,7 @@ struct Predictor {
   void Predict(void);
   void ConvertOutput(void);
   void AddOutput(Ort::Value&);
+  void Clear(void);
   void *ConvertTensorToPointer(Ort::Value&, size_t);
   struct Onnxruntime_Env {
     Ort::Env env_;
@@ -97,14 +98,21 @@ Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
 
 }
 
-/* Description: Destructor of the predictor to clean up dynamic allocated momory */
-Predictor::~Predictor() {
+/* Description: clean up the predictor for next prediction */
+void Predictor::Clear() {
   for(size_t i = 0; i < converted_output_.size(); i++) {
     free(converted_output_[i].data_ptr);
     free((void*) converted_output_[i].shape_ptr);
     converted_output_[i].data_ptr = nullptr;
     converted_output_[i].shape_ptr = nullptr;
   }
+  converted_output_.clear();
+  input_.clear();
+}
+
+/* Description: Destructor of the predictor to clean up dynamic allocated momory */
+Predictor::~Predictor() {
+  Clear();
 }
 
 /* Description: Do the inference in onnxruntime */
@@ -223,6 +231,17 @@ ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind dev
   const auto ctx = new Predictor(model_file, device);
   return (ORT_PredictorContext) ctx;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, (ORT_PredictorContext) nullptr);
+}
+
+/* Description: The interface for Go to clear the predictor */
+void ORT_PredictorClear(ORT_PredictorContext pred) {
+  HANDLE_ORT_ERRORS(ORT_GlobalError);
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorClear."));
+  }
+  predictor->Clear();
+  END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
 /* Description: The interface for Go to do inference */

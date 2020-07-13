@@ -87,6 +87,8 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 		return errors.New("input nil or empty")
 	}
 
+	C.ORT_PredictorClear(p.ctx)
+
 	for _, input := range inputs {
 		dense, ok := input.(*tensor.Dense)
 		if !ok {
