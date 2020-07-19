@@ -20,7 +20,6 @@ using std::string;
 /* Description: The structure to handle the predictor for onnxruntime
  * Note: Call ConvertOutput before you want to read the outputs
  */ 
-// TODO:ADD GPU
 struct Predictor {
   Predictor(const string &model_file, ORT_DeviceKind device);
   ~Predictor();
@@ -39,8 +38,6 @@ struct Predictor {
       // Initialize environment, could use ORT_LOGGING_LEVEL_VERBOSE to get more information
       // NOTE: Only one instance of env can exist at any point in time
       
-      session_options_.SetIntraOpNumThreads(1);
-
       // enable profiling, the argument is the prefix you want for the file
       session_options_.EnableProfiling("onnxruntime");
       

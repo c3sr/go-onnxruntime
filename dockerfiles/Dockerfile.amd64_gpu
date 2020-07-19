@@ -1,4 +1,4 @@
-FROM carml/base:amd64-cpu-latest
+FROM carml/base:amd64-gpu-latest
 MAINTAINER Yen-Hsiang Chang <yhchang3@illinois.edu>
 
 # Build-time metadata as defined at http://label-schema.org
@@ -49,7 +49,7 @@ ARG BRANCH=v1.3.1
 
 RUN git clone --single-branch --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
   git submodule update --init && \
-  ./build.sh --config RelWithDebInfo --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=/opt/onnxruntime/ && \
+  ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_cuda --config RelWithDebInfo --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=/opt/onnxruntime/ && \
   cd build/Linux/RelWithDebInfo && \
   make install
 
@@ -66,14 +66,14 @@ RUN git clone --depth=1 --single-branch --branch=master  https://${PKG}.git .
 
 RUN dep ensure -v -vendor-only
 
-RUN go install -a -tags=nogpu -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"
+RUN go install -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"
 
 RUN cd examples/_fixtures && ./download_alexnet.sh && \
     cd ../..
 
 RUN svn export --force https://github.com/rai-project/mlmodelscope/trunk/carml_config.yml.example ~/.carml_config.yml
 
-RUN go test -tags=nogpu
+RUN go test
 
 RUN rm -fr examples/_fixetures/torchvision_alexnet
 
