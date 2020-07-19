@@ -17,13 +17,11 @@ The binding requires Onnxruntime C++ and other Go packages.
 
 The Go binding for Onnxruntime C++ API in this repository is built based on Onnxruntime v1.3.1 .
 
-To install Onnxruntime C++ on your system, you can follow the instruction on [Onnxruntime Installation](https://microsoft.github.io/onnxruntime/).
+To install Onnxruntime C++ on your system, you can follow the instruction on [Onnxruntime Installation](https://microsoft.github.io/onnxruntime/) and refer to the [dockerfiles](dockerfiles).
 
 The Onnxruntime C++ libraries are expected to be under `/opt/onnxruntime/lib`.
 
-The Onnxruntime C++ header files (the [include](https://github.com/microsoft/onnxruntime/tree/master/include) directory from [Onnxruntime](https://github.com/microsoft/onnxruntime)) are expected to be under `/opt/onnxruntime`.
-
-Now there are two directories, `lib` and `include`, under `/opt/onnxruntime/`.
+The Onnxruntime C++ header files are expected to be under `/opt/onnxruntime/include`.
 
 If you get an error about not being able to write to `/opt` then perform the following:
 
@@ -31,6 +29,8 @@ If you get an error about not being able to write to `/opt` then perform the fol
 sudo mkdir -p /opt/onnxruntime
 sudo chown -R `whoami` /opt/onnxruntime
 ```
+
+If you want to change the paths to the Onnxruntime C++ API, you need to also change the corresponding paths in [lib.go](lib.go) .
 
 ### Go Packages
 
@@ -49,14 +49,14 @@ Configure the linker environmental variables since the Onnxruntime C++ library i
 Linux
 ```
 export LIBRARY_PATH=$LIBRARY_PATH:/opt/onnxruntime/lib
-export LD_LIBRARY_PATH=/opt/onnxruntime/lib:$DYLD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/onnxruntime/lib
 
 ```
 
 macOS
 ```
 export LIBRARY_PATH=$LIBRARY_PATH:/opt/onnxruntime/lib
-export DYLD_LIBRARY_PATH=/opt/onnxruntime/lib:$DYLD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/opt/onnxruntime/lib
 ```
 ## Check the Build
 

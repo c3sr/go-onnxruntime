@@ -25,32 +25,32 @@ LABEL org.carml.go-onnxruntime.build-date=$BUILD_DATE \
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  tzdata && \
-  rm -rf /var/lib/apt/lists/*
+  tzdata \
+  gcc-8 \
+  g++-8 \
+  locales \
+  && \
+  rm -rf /var/lib/apt/lists/* && \
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-8 && \
+  gcc --version && \
+  g++ --version
 
 RUN ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime && \
   dpkg-reconfigure --frontend noninteractive tzdata
 
+RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
+
 ########## LIBRARY INSTALLATION ###################
-WORKDIR /opt
-
-RUN mkdir onnxruntime
-
-RUN mkdir src && cd src
-
-RUN apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/*
+WORKDIR /
 
 # SOURCE INSTALLATION
 ARG BRANCH=v1.3.1
 
 RUN git clone --single-branch --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
   git submodule update --init && \
-  ./build.sh --config RelWithDebInfo --build_shared_lib --parallel
-
-RUN cp -r include /opt/onnxruntime/
-RUN cp -r build/Linux/RelWithDebInfo /opt/onnxruntime/lib
-
-RUN ls /opt/onnxruntime/lib
+  ./build.sh --config RelWithDebInfo --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=/opt/onnxruntime/ && \
+  cd build/Linux/RelWithDebInfo && \
+  make install
 
 ENV LD_LIBRARY_PATH /opt/onnxruntime/lib:${LD_LIBRARY_PATH}
 ENV LIBRARY_PATH /opt/onnxruntime/lib:${LIBRARY_PATH}
@@ -68,4 +68,8 @@ RUN go install -a -tags=nogpu -installsuffix cgo -ldflags "-s -w -X ${PKG}/Versi
 RUN cd examples/_fixtures && ./download_alexnet.sh && \
     cd ../..
 
-RUN go test
+RUN go test -tags=nogpu
+
+RUN rm -fr examples/_fixetures/torchvision_alexnet
+
+RUN rm -fr vendor
