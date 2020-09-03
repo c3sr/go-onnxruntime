@@ -102,7 +102,6 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		defer func() {
-			// TODO: fix the incorrect start time
 			start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
 			// Note: The pointer from C is already freed in p.ReadProfile()

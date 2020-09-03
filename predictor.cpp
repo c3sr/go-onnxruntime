@@ -53,7 +53,7 @@ struct Predictor {
       // ORT_ENABLE_BASIC -> To enable basic optimizations (Such as redundant node removals)
       // ORT_ENABLE_EXTENDED -> To enable extended optimizations (Includes level 1 + more complex optimizations like node fusions)
       // ORT_ENABLE_ALL -> To Enable All possible opitmizations
-      session_options_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+      session_options_.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
     }
   } ort_env_;
   // Order matters when using member initializer lists
@@ -73,9 +73,8 @@ struct Predictor {
  */
 Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
   : ort_env_(device), 
-    profile_start_(static_cast<int64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count())),
     session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
-  // TODO: find an adequate timestamp
+    profile_start_ = static_cast<int64_t>(session_.GetProfilingStartTime());
 
   // get input info
   size_t num_input_nodes = session_.GetInputCount();

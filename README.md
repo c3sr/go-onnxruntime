@@ -75,6 +75,10 @@ in your `~/.bashrc` or `~/.zshrc` file and then run either `source ~/.bashrc` or
 
 Examples of using the Go Onnxruntime binding to do model inference are under [examples](examples) .
 
+## TODO
+
+Getting the correct timestamp is not on the official release of onnxruntime, please track this [issue](https://github.com/microsoft/onnxruntime/issues/4555/) and this [pull request](https://github.com/microsoft/onnxruntime/pull/4994).
+
 ## Credits
 
 Some of the logic of conversion between Go types and Ort::Values is borrowed from [go-pytorch](https://github.com/rai-project/go-pytorch).
