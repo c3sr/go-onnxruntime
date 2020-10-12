@@ -14,7 +14,7 @@ import (
 	"github.com/rai-project/dlframework"
 	"github.com/rai-project/dlframework/framework/feature"
 	"github.com/rai-project/dlframework/framework/options"
-	"github.com/rai-project/go-onnxruntime"
+	"github.com/c3sr/go-onnxruntime"
 	raiimage "github.com/rai-project/image"
 	"github.com/rai-project/image/types"
 	nvidiasmi "github.com/rai-project/nvidia-smi"
