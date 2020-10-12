@@ -8,7 +8,7 @@ jobs:
      docker login -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
      cd dockerfiles
      make docker_build_cpu
-     # ./push.sh docker_push_cpu
+     ./push.sh docker_push_cpu
 - job: GPU
   timeoutInMinutes: 0
   pool:
@@ -18,5 +18,5 @@ jobs:
      docker login -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
      cd dockerfiles
      make docker_build_gpu
-     # ./push.sh docker_push_gpu
+     ./push.sh docker_push_gpu
 

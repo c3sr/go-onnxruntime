@@ -74,7 +74,7 @@ struct Predictor {
 Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
   : ort_env_(device), 
     session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
-    profile_start_ = static_cast<int64_t>(session_.GetProfilingStartTime());
+    profile_start_ = 0; // static_cast<int64_t>(session_.GetProfilingStartTime());
 
   // get input info
   size_t num_input_nodes = session_.GetInputCount();
