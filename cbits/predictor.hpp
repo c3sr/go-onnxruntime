@@ -55,6 +55,7 @@ extern "C" {
 
   void ORT_ResetError();
 
+  void ORT_EndProfiling(ORT_PredictorContext pred);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */

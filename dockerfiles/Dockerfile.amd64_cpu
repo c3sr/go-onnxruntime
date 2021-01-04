@@ -45,7 +45,7 @@ RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
 WORKDIR /
 
 # SOURCE INSTALLATION
-ARG BRANCH=v1.3.1
+ARG BRANCH=v1.6.0
 
 RUN git clone --single-branch --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
   git submodule update --init && \

@@ -44,6 +44,26 @@ func (t Trace) Len() int           { return t.TraceEvents.Len() }
 func (t Trace) Swap(i, j int)      { t.TraceEvents.Swap(i, j) }
 func (t Trace) Less(i, j int) bool { return t.TraceEvents.Less(i, j) }
 
+func SplitTrace(t *Trace, startSlice []int64, endSlice []int64) ([]*Trace, error) {
+	batchNum := 0
+	tSlice := []*Trace{}
+	tmpTrace := new(Trace)
+	tSlice = append(tSlice, tmpTrace)
+	tmpTrace.StartTime = time.Unix(0, startSlice[batchNum])
+	for _, event := range t.TraceEvents {
+		if event.End < endSlice[batchNum] {
+			tmpTrace.TraceEvents = append(tmpTrace.TraceEvents, event)
+		} else {
+			batchNum++
+			tmpTrace = new(Trace)
+			tSlice = append(tSlice, tmpTrace)
+			tmpTrace.StartTime = time.Unix(0, startSlice[batchNum])
+			tmpTrace.TraceEvents = append(tmpTrace.TraceEvents, event)
+		}
+	}
+	return tSlice, nil
+}
+
 func NewTrace(data string, start_time int64) (*Trace, error) {
 	trace := new(Trace)
 	err := json.Unmarshal([]byte(data), &trace.TraceEvents)
