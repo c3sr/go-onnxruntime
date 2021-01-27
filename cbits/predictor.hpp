@@ -46,6 +46,8 @@ extern "C" {
 
   void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
                     int n_dim, ONNXTensorElementDataType dtype);
+  
+  void ORT_EndProfiling(ORT_PredictorContext pred);
 
   // Error interface for Go
 
@@ -55,7 +57,6 @@ extern "C" {
 
   void ORT_ResetError();
 
-  void ORT_EndProfiling(ORT_PredictorContext pred);
 #ifdef __cplusplus
 }
 #endif  /* __cplusplus */

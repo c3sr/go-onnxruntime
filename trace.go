@@ -52,7 +52,9 @@ func SplitTrace(t *Trace, startSlice []int64, endSlice []int64) ([]*Trace, error
 	tmpTrace.StartTime = time.Unix(0, startSlice[batchNum])
 	for _, event := range t.TraceEvents {
 		if event.End < endSlice[batchNum] {
-			tmpTrace.TraceEvents = append(tmpTrace.TraceEvents, event)
+			if event.Start > startSlice[batchNum] {
+				tmpTrace.TraceEvents = append(tmpTrace.TraceEvents, event)
+			}
 		} else {
 			batchNum++
 			tmpTrace = new(Trace)

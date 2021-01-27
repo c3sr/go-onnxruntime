@@ -104,6 +104,7 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	}
 
 	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
+
 	if p.options.TraceLevel() < tracer.FRAMEWORK_TRACE {
 		defer predictSpan.Finish()
 	}
@@ -131,16 +132,21 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	if err != nil {
 		return err
 	}
+
 	defer p.cuptiClose()
+
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		p.predictSpanSlice = append(p.predictSpanSlice, predictSpan)
 		p.ctxSlice = append(p.ctxSlice, ctx)
 		p.startingTimeSlice = append(p.startingTimeSlice, time.Now().UnixNano())
 	}
+
 	C.ORT_PredictorRun(p.ctx)
+
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		p.endingTimeSlice = append(p.endingTimeSlice, time.Now().UnixNano())
 	}
+
 	return GetError()
 }
 
@@ -177,26 +183,34 @@ func (p *Predictor) Close() {
 	if p == nil {
 		return
 	}
+
 	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		C.ORT_EndProfiling(p.ctx)
 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
+
 		profBuffer, err := p.ReadProfile()
 		if err != nil {
 			pp.Println(err)
 			return
 		}
+
 		t, err := NewTrace(profBuffer, start_time)
 		if err != nil {
 			panic(err)
-			return
 		}
+
 		tSlice, err := SplitTrace(t, p.startingTimeSlice, p.endingTimeSlice)
+		if err != nil {
+			panic(err)
+		}
+
 		for batchNum, ctx := range p.ctxSlice {
 			tSlice[batchNum].Publish(ctx, tracer.FRAMEWORK_TRACE)
 			p.predictSpanSlice[batchNum].FinishWithOptions(opentracing.FinishOptions{
 				FinishTime: time.Unix(0, p.endingTimeSlice[batchNum]),
 			})
 		}
+
 		// clear records
 		p.startingTimeSlice = nil
 		p.endingTimeSlice = nil
