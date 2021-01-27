@@ -2,6 +2,7 @@
 #include "predictor.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -329,6 +330,22 @@ char *ORT_ProfilingRead(ORT_PredictorContext pred) {
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, strdup(""));
 }
 
+
+/* Description: High resolution clock might not be what we want
+ *              so get the offset
+ */
+static int64_t Getoffset(void) {
+	using namespace std::chrono;
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
+	system_clock::time_point t2 = system_clock::now();
+	system_clock::time_point t3 = system_clock::now();
+	high_resolution_clock::time_point t4 = high_resolution_clock::now();
+	return (static_cast<int64_t>(duration_cast<nanoseconds>(t2.time_since_epoch()).count()) 
+	      - static_cast<int64_t>(duration_cast<nanoseconds>(t1.time_since_epoch()).count())
+	      + static_cast<int64_t>(duration_cast<nanoseconds>(t3.time_since_epoch()).count())
+	      - static_cast<int64_t>(duration_cast<nanoseconds>(t4.time_since_epoch()).count())) / 2;
+}
+
 /* Description: The interface for Go to get the start time of the profiler */
 int64_t ORT_ProfilingGetStartTime(ORT_PredictorContext pred) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
@@ -337,7 +354,7 @@ int64_t ORT_ProfilingGetStartTime(ORT_PredictorContext pred) {
     throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_ProfilingGetStartTime."));
   }
 
-  return static_cast<int64_t>(predictor->session_.GetProfilingStartTimeNs());
+  return static_cast<int64_t>(predictor->session_.GetProfilingStartTimeNs()) + Getoffset();
 
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, -1);
 }

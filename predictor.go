@@ -11,13 +11,13 @@ import (
 	"unsafe"
 
 	"github.com/Unknwon/com"
-	"github.com/k0kubun/pp"
-	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/pkg/errors"
 	"github.com/c3sr/dlframework/framework/options"
 	cupti "github.com/c3sr/go-cupti"
 	nvidiasmi "github.com/c3sr/nvidia-smi"
 	"github.com/c3sr/tracer"
+	"github.com/k0kubun/pp"
+	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/pkg/errors"
 	"gorgonia.org/tensor"
 )
 
@@ -105,28 +105,9 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
 
-	if p.options.TraceLevel() < tracer.FRAMEWORK_TRACE {
+	if tracer.GetLevel() < tracer.FRAMEWORK_TRACE {
 		defer predictSpan.Finish()
 	}
-
-	// if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
-	// 	defer func() {
-	// 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
-
-	// 		// Note: The pointer from C is already freed in p.ReadProfile()
-	// 		profBuffer, err := p.ReadProfile()
-	// 		if err != nil {
-	// 			pp.Println(err)
-	// 			return
-	// 		}
-	// 		t, err := NewTrace(profBuffer, start_time)
-	// 		if err != nil {
-	// 			panic(err)
-	// 			return
-	// 		}
-	// 		t.Publish(ctx, tracer.FRAMEWORK_TRACE)
-	// 	}()
-	// }
 
 	err := p.cuptiStart(ctx)
 	if err != nil {
@@ -135,7 +116,7 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	defer p.cuptiClose()
 
-	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+	if tracer.GetLevel() >= tracer.FRAMEWORK_TRACE {
 		p.predictSpanSlice = append(p.predictSpanSlice, predictSpan)
 		p.ctxSlice = append(p.ctxSlice, ctx)
 		p.startingTimeSlice = append(p.startingTimeSlice, time.Now().UnixNano())
@@ -143,7 +124,7 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 
 	C.ORT_PredictorRun(p.ctx)
 
-	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+	if tracer.GetLevel() >= tracer.FRAMEWORK_TRACE {
 		p.endingTimeSlice = append(p.endingTimeSlice, time.Now().UnixNano())
 	}
 
@@ -184,7 +165,7 @@ func (p *Predictor) Close() {
 		return
 	}
 
-	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+	if tracer.GetLevel() >= tracer.FRAMEWORK_TRACE {
 		C.ORT_EndProfiling(p.ctx)
 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
