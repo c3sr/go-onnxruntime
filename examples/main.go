@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/k0kubun/pp"
 	"github.com/c3sr/config"
 	"github.com/c3sr/dlframework"
 	"github.com/c3sr/dlframework/framework/feature"
@@ -20,6 +19,7 @@ import (
 	nvidiasmi "github.com/c3sr/nvidia-smi"
 	"github.com/c3sr/tracer"
 	_ "github.com/c3sr/tracer/all"
+	"github.com/k0kubun/pp"
 	gotensor "gorgonia.org/tensor"
 )
 

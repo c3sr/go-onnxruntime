@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"time"
 
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/c3sr/tracer"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 type TraceEvent struct {
@@ -79,12 +80,15 @@ func NewTrace(data string, start_time int64) (*Trace, error) {
 		trace.TraceEvents[i].End = start_time + event.Timestamp*1000 + event.Duration*1000
 		trace.TraceEvents[i].EndTime = time.Unix(0, trace.TraceEvents[i].End)
 	}
+
+	sort.Sort(trace.TraceEvents)
+
 	return trace, nil
 }
 
 func (event *TraceEvent) Publish(ctx context.Context, lvl tracer.Level, opts ...opentracing.StartSpanOption) error {
 	// skip the events for loading model and setting environments in onnxruntime
-	if event.Name == "model_loading_from_saved_proto" || event.Name == "session_initialization" {
+	if event.Name == "model_loading_from_uri" || event.Name == "session_initialization" {
 		return nil
 	}
 
