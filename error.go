@@ -10,7 +10,7 @@ import (
 )
 
 /* Description: The interface for getting errors thrown by C++.
- * Referenced: https://github.com/rai-project/go-pytorch/blob/master/errors.go
+ * Referenced: https://github.com/c3sr/go-pytorch/blob/master/errors.go
  */
 
 // Error returned by C++

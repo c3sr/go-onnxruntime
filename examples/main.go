@@ -10,16 +10,16 @@ import (
 	"strings"
 
 	"github.com/k0kubun/pp"
-	"github.com/rai-project/config"
-	"github.com/rai-project/dlframework"
-	"github.com/rai-project/dlframework/framework/feature"
-	"github.com/rai-project/dlframework/framework/options"
+	"github.com/c3sr/config"
+	"github.com/c3sr/dlframework"
+	"github.com/c3sr/dlframework/framework/feature"
+	"github.com/c3sr/dlframework/framework/options"
 	"github.com/c3sr/go-onnxruntime"
-	raiimage "github.com/rai-project/image"
-	"github.com/rai-project/image/types"
-	nvidiasmi "github.com/rai-project/nvidia-smi"
-	"github.com/rai-project/tracer"
-	_ "github.com/rai-project/tracer/all"
+	c3srimage "github.com/c3sr/image"
+	"github.com/c3sr/image/types"
+	nvidiasmi "github.com/c3sr/nvidia-smi"
+	"github.com/c3sr/tracer"
+	_ "github.com/c3sr/tracer/all"
 	gotensor "gorgonia.org/tensor"
 )
 
@@ -85,17 +85,17 @@ func main() {
 	height := shape[2]
 	width := shape[3]
 
-	var imgOpts []raiimage.Option
-	imgOpts = append(imgOpts, raiimage.Mode(types.RGBMode))
+	var imgOpts []c3srimage.Option
+	imgOpts = append(imgOpts, c3srimage.Mode(types.RGBMode))
 
-	img, err := raiimage.Read(r, imgOpts...)
+	img, err := c3srimage.Read(r, imgOpts...)
 	if err != nil {
 		panic(err)
 	}
 
-	imgOpts = append(imgOpts, raiimage.Resized(height, width))
-	imgOpts = append(imgOpts, raiimage.ResizeAlgorithm(types.ResizeAlgorithmLinear))
-	resized, err := raiimage.Resize(img, imgOpts...)
+	imgOpts = append(imgOpts, c3srimage.Resized(height, width))
+	imgOpts = append(imgOpts, c3srimage.ResizeAlgorithm(types.ResizeAlgorithmLinear))
+	resized, err := c3srimage.Resize(img, imgOpts...)
 
 	imgFloats, err := normalizeImageCHW(resized, mean, scale)
 	if err != nil {

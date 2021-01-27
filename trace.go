@@ -7,7 +7,7 @@ import (
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
-	"github.com/rai-project/tracer"
+	"github.com/c3sr/tracer"
 )
 
 type TraceEvent struct {

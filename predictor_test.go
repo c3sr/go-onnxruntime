@@ -7,10 +7,10 @@ import (
 	"testing"
 
 	"github.com/GeertJohan/go-sourcepath"
-	"github.com/rai-project/config"
-	"github.com/rai-project/dlframework/framework/options"
-	nvidiasmi "github.com/rai-project/nvidia-smi"
-	_ "github.com/rai-project/tracer/all"
+	"github.com/c3sr/config"
+	"github.com/c3sr/dlframework/framework/options"
+	nvidiasmi "github.com/c3sr/nvidia-smi"
+	_ "github.com/c3sr/tracer/all"
 	"github.com/stretchr/testify/assert"
 	gotensor "gorgonia.org/tensor"
 )

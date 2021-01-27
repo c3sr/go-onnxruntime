@@ -24,57 +24,75 @@
 #   go-tests = true
 #   unused-packages = true
 
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/GeertJohan/go-sourcepath"
+
 [[constraint]]
   name = "github.com/Unknwon/com"
-  version = "1.0.0"
+  version = "1.0.1"
 
 [[constraint]]
   branch = "master"
   name = "github.com/benesch/cgosymbolizer"
 
 [[constraint]]
-  name = "github.com/pkg/errors"
-  version = "0.8.0"
+  branch = "master"
+  name = "github.com/c3sr/config"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rai-project/config"
+  name = "github.com/c3sr/dlframework"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rai-project/dlframework"
+  name = "github.com/c3sr/go-cupti"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rai-project/logger"
+  name = "github.com/c3sr/image"
 
 [[constraint]]
   branch = "master"
-  name = "github.com/rai-project/nvidia-smi"
+  name = "github.com/c3sr/logger"
 
 [[constraint]]
-	branch = "master"
-  name = "github.com/rai-project/tracer"
+  branch = "master"
+  name = "github.com/c3sr/nvidia-smi"
 
 [[constraint]]
-	branch = "master"
-  name = "github.com/rai-project/go-cupti"
+  branch = "master"
+  name = "github.com/c3sr/tracer"
 
 [[constraint]]
-  name = "github.com/sirupsen/logrus"
+  name = "github.com/k0kubun/pp"
+  version = "3.0.7"
+
+[[constraint]]
+  name = "github.com/opentracing/opentracing-go"
   version = "1.2.0"
 
 [[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.1"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.7.0"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.7.0"
+
+[[constraint]]
   name = "gorgonia.org/tensor"
-  version = "0.9.0-beta"
+  version = "0.95.0"
 
 [[override]]
   name = "gonum.org/v1/gonum"
   version = "=0.6.0"
 
-[[override]]
-  name = "github.com/k0kubun/pp"
-  version = "3.0.1"
-
 [prune]
   go-tests = true
+  unused-packages = true

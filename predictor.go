@@ -14,10 +14,10 @@ import (
 	"github.com/k0kubun/pp"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/rai-project/dlframework/framework/options"
-	cupti "github.com/rai-project/go-cupti"
-	nvidiasmi "github.com/rai-project/nvidia-smi"
-	"github.com/rai-project/tracer"
+	"github.com/c3sr/dlframework/framework/options"
+	cupti "github.com/c3sr/go-cupti"
+	nvidiasmi "github.com/c3sr/nvidia-smi"
+	"github.com/c3sr/tracer"
 	"gorgonia.org/tensor"
 )
 

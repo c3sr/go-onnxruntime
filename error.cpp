@@ -2,7 +2,7 @@
 #include "predictor.hpp"
 
 /* Description: The interface for getting errors in C++, used by Go functions.
- * Referenced: https://github.com/rai-project/go-pytorch/blob/master/error.cpp
+ * Referenced: https://github.com/c3sr/go-pytorch/blob/master/error.cpp
  */
 
 ORT_Error ORT_GlobalError{.message = nullptr};

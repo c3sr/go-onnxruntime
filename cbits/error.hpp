@@ -5,7 +5,7 @@
 
 /* Description: try and catch MACROS used for C++ functions, adapted from go-pytorch
  * Referenced: 
- * https://github.com/rai-project/go-pytorch/blob/master/cbits/error.hpp
+ * https://github.com/c3sr/go-pytorch/blob/master/cbits/error.hpp
  * https://github.com/microsoft/onnxruntime/blob/master/include/onnxruntime/core/common/exceptions.h
  * NOTE: Put a semicolumn after using these MACROS, as a C++ function.
  */
