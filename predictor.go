@@ -7,22 +7,28 @@ import (
 	"context"
 	"runtime"
 	"strings"
+	"time"
 	"unsafe"
 
 	"github.com/Unknwon/com"
 	"github.com/k0kubun/pp"
+	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pkg/errors"
-	"github.com/rai-project/dlframework/framework/options"
-	cupti "github.com/rai-project/go-cupti"
-	nvidiasmi "github.com/rai-project/nvidia-smi"
-	"github.com/rai-project/tracer"
+	"github.com/c3sr/dlframework/framework/options"
+	cupti "github.com/c3sr/go-cupti"
+	nvidiasmi "github.com/c3sr/nvidia-smi"
+	"github.com/c3sr/tracer"
 	"gorgonia.org/tensor"
 )
 
 type Predictor struct {
-	ctx     C.ORT_PredictorContext
-	options *options.Options
-	cu      *cupti.CUPTI
+	ctx               C.ORT_PredictorContext
+	options           *options.Options
+	cu                *cupti.CUPTI
+	startingTimeSlice []int64
+	endingTimeSlice   []int64
+	ctxSlice          []context.Context
+	predictSpanSlice  []opentracing.Span
 }
 
 func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
@@ -98,34 +104,48 @@ func (p *Predictor) Predict(ctx context.Context, inputs []tensor.Tensor) error {
 	}
 
 	predictSpan, ctx := tracer.StartSpanFromContext(ctx, tracer.MODEL_TRACE, "c_predict")
-	defer predictSpan.Finish()
 
-	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
-		defer func() {
-			start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
-
-			// Note: The pointer from C is already freed in p.ReadProfile()
-			profBuffer, err := p.ReadProfile()
-			if err != nil {
-				pp.Println(err)
-				return
-			}
-			t, err := NewTrace(profBuffer, start_time)
-			if err != nil {
-				panic(err)
-				return
-			}
-			t.Publish(ctx, tracer.FRAMEWORK_TRACE)
-		}()
+	if p.options.TraceLevel() < tracer.FRAMEWORK_TRACE {
+		defer predictSpan.Finish()
 	}
+
+	// if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+	// 	defer func() {
+	// 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
+
+	// 		// Note: The pointer from C is already freed in p.ReadProfile()
+	// 		profBuffer, err := p.ReadProfile()
+	// 		if err != nil {
+	// 			pp.Println(err)
+	// 			return
+	// 		}
+	// 		t, err := NewTrace(profBuffer, start_time)
+	// 		if err != nil {
+	// 			panic(err)
+	// 			return
+	// 		}
+	// 		t.Publish(ctx, tracer.FRAMEWORK_TRACE)
+	// 	}()
+	// }
 
 	err := p.cuptiStart(ctx)
 	if err != nil {
 		return err
 	}
+
 	defer p.cuptiClose()
 
+	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+		p.predictSpanSlice = append(p.predictSpanSlice, predictSpan)
+		p.ctxSlice = append(p.ctxSlice, ctx)
+		p.startingTimeSlice = append(p.startingTimeSlice, time.Now().UnixNano())
+	}
+
 	C.ORT_PredictorRun(p.ctx)
+
+	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+		p.endingTimeSlice = append(p.endingTimeSlice, time.Now().UnixNano())
+	}
 
 	return GetError()
 }
@@ -163,10 +183,46 @@ func (p *Predictor) Close() {
 	if p == nil {
 		return
 	}
+
+	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+		C.ORT_EndProfiling(p.ctx)
+		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
+
+		profBuffer, err := p.ReadProfile()
+		if err != nil {
+			pp.Println(err)
+			return
+		}
+
+		t, err := NewTrace(profBuffer, start_time)
+		if err != nil {
+			panic(err)
+		}
+
+		tSlice, err := SplitTrace(t, p.startingTimeSlice, p.endingTimeSlice)
+		if err != nil {
+			panic(err)
+		}
+
+		for batchNum, ctx := range p.ctxSlice {
+			tSlice[batchNum].Publish(ctx, tracer.FRAMEWORK_TRACE)
+			p.predictSpanSlice[batchNum].FinishWithOptions(opentracing.FinishOptions{
+				FinishTime: time.Unix(0, p.endingTimeSlice[batchNum]),
+			})
+		}
+
+		// clear records
+		p.startingTimeSlice = nil
+		p.endingTimeSlice = nil
+		p.ctxSlice = nil
+		p.predictSpanSlice = nil
+	}
+
 	if p.ctx != nil {
 		C.ORT_PredictorDelete(p.ctx)
 	}
 	p.ctx = nil
+
 }
 
 func (p *Predictor) cuptiStart(ctx context.Context) error {

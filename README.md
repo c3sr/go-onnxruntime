@@ -1,21 +1,23 @@
 # go-onnxruntime
 
+[![Build Status](https://dev.azure.com/yhchang/c3sr/_apis/build/status/c3sr.go-onnxruntime?branchName=master)](https://dev.azure.com/yhchang/c3sr/_build/latest?definitionId=7&branchName=master)
+
 Go binding for Onnxruntime C++ API.
-This is used by the [Onnxruntime agent](https://github.com/rai-project/onnxruntime) in [MLModelScope](mlmodelscope.org) to perform model inference in Go.
+This is used by the [Onnxruntime agent](https://github.com/c3sr/onnxruntime) in [MLModelScope](mlmodelscope.org) to perform model inference in Go.
 
 ## Installation
 
 Download and install go-onnxruntime:
 
 ```
-go get -v github.com/rai-project/go-onnxruntime
+go get -v github.com/c3sr/go-onnxruntime
 ```
 
 The binding requires Onnxruntime C++ and other Go packages.
 
 ### Onnxruntime C++ Library
 
-The Go binding for Onnxruntime C++ API in this repository is built based on Onnxruntime v1.3.1 .
+The Go binding for Onnxruntime C++ API in this repository is built based on Onnxruntime v1.6.0.
 
 To install Onnxruntime C++ on your system, you can follow the instruction on [Onnxruntime Installation](https://microsoft.github.io/onnxruntime/) and refer to the [dockerfiles](dockerfiles).
 
@@ -75,10 +77,6 @@ in your `~/.bashrc` or `~/.zshrc` file and then run either `source ~/.bashrc` or
 
 Examples of using the Go Onnxruntime binding to do model inference are under [examples](examples) .
 
-## TODO
-
-Getting the correct timestamp is not on the official release of onnxruntime, please track this [issue](https://github.com/microsoft/onnxruntime/issues/4555/) and this [pull request](https://github.com/microsoft/onnxruntime/pull/4994).
-
 ## Credits
 
-Some of the logic of conversion between Go types and Ort::Values is borrowed from [go-pytorch](https://github.com/rai-project/go-pytorch).
+Some of the logic of conversion between Go types and Ort::Values is borrowed from [go-pytorch](https://github.com/c3sr/go-pytorch).

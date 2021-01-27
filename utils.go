@@ -10,7 +10,7 @@ import (
 )
 
 /* Description: Convert data from a pointer to an int slice
- * Referenced: https://github.com/rai-project/go-pytorch/blob/master/utils.go
+ * Referenced: https://github.com/c3sr/go-pytorch/blob/master/utils.go
  */
 func toIntSlice(data []int64) []int {
 	res := make([]int, len(data))
@@ -21,7 +21,7 @@ func toIntSlice(data []int64) []int {
 }
 
 /* Description: Get flatten length for a shape
- * Referenced: https://github.com/rai-project/go-pytorch/blob/master/utils.go
+ * Referenced: https://github.com/c3sr/go-pytorch/blob/master/utils.go
  */
 func getFlattenedLength(data []int64) int {
 	res := 1
@@ -32,7 +32,7 @@ func getFlattenedLength(data []int64) int {
 }
 
 /* Description: Convert Ort_Value from C++ to Go tensor, referenced from ivalueToTensor in go-pytorch
- * Referenced: https://github.com/rai-project/go-pytorch/blob/master/utils.go
+ * Referenced: https://github.com/c3sr/go-pytorch/blob/master/utils.go
  */
 func ortValueToTensor(ctx C.ORT_Value) tensor.Tensor {
 	shapeLength := int64(ctx.shape_len)

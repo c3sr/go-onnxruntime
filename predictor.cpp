@@ -28,6 +28,7 @@ struct Predictor {
   void AddOutput(Ort::Value&);
   void Clear(void);
   void *ConvertTensorToPointer(Ort::Value&, size_t);
+  void EndProfiling(void);
   struct Onnxruntime_Env {
     Ort::Env env_;
     Ort::SessionOptions session_options_;
@@ -74,7 +75,6 @@ struct Predictor {
 Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
   : ort_env_(device), 
     session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
-    profile_start_ = 0; // static_cast<int64_t>(session_.GetProfilingStartTime());
 
   // get input info
   size_t num_input_nodes = session_.GetInputCount();
@@ -120,8 +120,6 @@ void Predictor::Predict(void) {
 
   output_ = session_.Run(Ort::RunOptions{nullptr}, input_node_.data(), input_.data(),
                          input_.size(), output_node_.data(), output_node_.size());
-
-  profile_filename_ = session_.EndProfiling(allocator_);
 
 }
 
@@ -219,6 +217,20 @@ void Predictor::ConvertOutput(void) {
   for (size_t i = 0; i < output_.size(); i++) {
     AddOutput(output_[i]);
   }
+}
+
+void Predictor::EndProfiling(void) {
+  profile_filename_ = session_.EndProfiling(allocator_);
+}
+
+void ORT_EndProfiling(ORT_PredictorContext pred) {
+  HANDLE_ORT_ERRORS(ORT_GlobalError);
+  auto predictor = (Predictor *)pred;
+  if (predictor == nullptr) {
+    throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorClear."));
+  }
+  predictor->EndProfiling();
+  END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
 
 /* Description: The interface for Go to create a new predictor */
@@ -325,7 +337,8 @@ int64_t ORT_ProfilingGetStartTime(ORT_PredictorContext pred) {
     throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_ProfilingGetStartTime."));
   }
 
-  return predictor -> profile_start_;
+  return static_cast<int64_t>(predictor->session_.GetProfilingStartTimeNs());
+
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, -1);
 }
 
