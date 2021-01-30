@@ -114,7 +114,7 @@
   revision = "47f0c73e5808d72263a55355b19812dac907571f"
 
 [[projects]]
-  digest = "1:e26f11401e8f37b2bc76a2a3faa07d614209c20b765325c28956d43fbc702d74"
+  digest = "0:"
   name = "github.com/c3sr/dlframework"
   packages = [
     ".",
@@ -122,8 +122,8 @@
     "framework/options",
   ]
   pruneopts = "UT"
-  revision = "57e6c933fdf27ede7471991c01a8fa13c2719775"
-  version = "v0.3.0"
+  revision = "bd47808bf7fcc9985f0b3f1fcecd8d267553357c"
+  version = "v0.3.1"
 
 [[projects]]
   branch = "master"
