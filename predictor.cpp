@@ -10,6 +10,7 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #include <onnxruntime_cxx_api.h>
 
 #ifdef ORT_WITH_GPU
@@ -310,6 +311,10 @@ void ORT_PredictorDelete(ORT_PredictorContext pred) {
   if (predictor == nullptr) {
     throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorDelete."));
   }
+
+  if(predictor -> profile_filename_ != "")
+  	remove(predictor -> profile_filename_);
+
   delete predictor;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
 }
