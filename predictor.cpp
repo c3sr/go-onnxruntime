@@ -312,7 +312,8 @@ void ORT_PredictorDelete(ORT_PredictorContext pred) {
     throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_PredictorDelete."));
   }
 
-  remove(predictor -> profile_filename_);
+  if(predictor -> profile_filename_ != "")
+  	remove(predictor -> profile_filename_);
 
   delete predictor;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
