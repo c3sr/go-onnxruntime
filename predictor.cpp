@@ -313,7 +313,7 @@ void ORT_PredictorDelete(ORT_PredictorContext pred) {
   }
 
   if(predictor -> profile_filename_ != "")
-  	remove(predictor -> profile_filename_);
+  	remove((predictor -> profile_filename_).c_str());
 
   delete predictor;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, void());
