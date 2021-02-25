@@ -1,4 +1,4 @@
-FROM carml/base:amd64-gpu-latest
+FROM c3sr/base:amd64-gpu-latest
 MAINTAINER Yen-Hsiang Chang <yhchang3@illinois.edu>
 
 # Build-time metadata as defined at http://label-schema.org

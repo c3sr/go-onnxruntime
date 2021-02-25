@@ -1,6 +1,8 @@
 #ifndef __PREDICTOR_HPP__
 #define __PREDICTOR_HPP__
 
+
+#include <stdbool.h>
 #ifdef __cplusplus
 #include <onnxruntime_cxx_api.h>
 extern "C" {
@@ -26,7 +28,7 @@ extern "C" {
 
   // Predictor + Profiling interface for Go
 
-  ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device);
+  ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace);
 
   void ORT_PredictorClear(ORT_PredictorContext pred);
 
