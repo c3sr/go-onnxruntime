@@ -52,7 +52,7 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	defer C.free(unsafe.Pointer(cModelFile))
 
 	pred := &Predictor{
-		ctx:     C.ORT_NewPredictor(cModelFile, C.ORT_DeviceKind(device)),
+		ctx:     C.ORT_NewPredictor(cModelFile, C.ORT_DeviceKind(device), C.bool(options.TraceLevel() >= tracer.FRAMEWORK_TRACE)),
 		options: options,
 	}
 
@@ -165,7 +165,7 @@ func (p *Predictor) Close() {
 		return
 	}
 
-	if tracer.GetLevel() >= tracer.FRAMEWORK_TRACE {
+	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		C.ORT_EndProfiling(p.ctx)
 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
