@@ -23,7 +23,7 @@ using std::string;
  * Note: Call ConvertOutput before you want to read the outputs
  */ 
 struct Predictor {
-  Predictor(const string &model_file, ORT_DeviceKind device);
+  Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace);
   ~Predictor();
   void Predict(void);
   void ConvertOutput(void);
@@ -37,12 +37,13 @@ struct Predictor {
     /* Description: Follow the sample given in onnxruntime to initialize the environment
      * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
      */
-    Onnxruntime_Env(ORT_DeviceKind device) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
+    Onnxruntime_Env(ORT_DeviceKind device, bool enable_trace) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
       // Initialize environment, could use ORT_LOGGING_LEVEL_VERBOSE to get more information
       // NOTE: Only one instance of env can exist at any point in time
       
       // enable profiling, the argument is the prefix you want for the file
-      session_options_.EnableProfiling("onnxruntime");
+      if(enable_trace)
+      	session_options_.EnableProfiling("onnxruntime");
       
       #ifdef ORT_WITH_GPU
       if (device == CUDA_DEVICE_KIND) {
@@ -69,14 +70,16 @@ struct Predictor {
   std::vector<const char*> output_node_;
   std::vector<Ort::Value> output_;
   std::vector<ORT_Value> converted_output_;
+  bool enable_trace_;
 };
 
 /* Description: Follow the sample given in onnxruntime to initialize the predictor
  * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
  */
-Predictor::Predictor(const string &model_file, ORT_DeviceKind device)
-  : ort_env_(device), 
-    session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_) {
+Predictor::Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace)
+  : ort_env_(device, enable_trace), 
+    session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_),
+    enable_trace_(enable_trace) {
 
   // get input info
   size_t num_input_nodes = session_.GetInputCount();
@@ -222,7 +225,8 @@ void Predictor::ConvertOutput(void) {
 }
 
 void Predictor::EndProfiling(void) {
-  profile_filename_ = session_.EndProfiling(allocator_);
+  if(enable_trace_)
+  	profile_filename_ = session_.EndProfiling(allocator_);
 }
 
 void ORT_EndProfiling(ORT_PredictorContext pred) {
@@ -236,9 +240,9 @@ void ORT_EndProfiling(ORT_PredictorContext pred) {
 }
 
 /* Description: The interface for Go to create a new predictor */
-ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device) {
+ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
-  const auto ctx = new Predictor(model_file, device);
+  const auto ctx = new Predictor(model_file, device, enable_trace);
   return (ORT_PredictorContext) ctx;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, (ORT_PredictorContext) nullptr);
 }
