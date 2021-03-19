@@ -1,7 +1,7 @@
 package onnxruntime
 
 var (
-	Version   = "0.0.6"
+	Version   = "1.0.0"
 	BuildDate = "undefined"
 	GitCommit = "undefined"
 )
