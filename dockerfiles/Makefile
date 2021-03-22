@@ -22,6 +22,12 @@ CODE_VERSION = v$(strip $(shell cat ../VERSION))
 # Find out if the working directory is clean
 GIT_NOT_CLEAN_CHECK = $(shell git status --porcelain)
 
+# Version of cuda to use
+CUDA_VERSION ?= 10.0
+
+# Version fo ONNXRUNTIME to use
+ONNXRUNTIME_VERSION ?= 1.7.1
+
 # If we're releasing to Docker Hub, and we're going to mark it with the latest tag, it should exactly match a version release
 ifeq ($(MAKECMDGOALS),release)
 # Use the version number as the release tag.
@@ -47,28 +53,29 @@ BUILD_ARGS = --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 			 --build-arg VCS_URL=`git config --get remote.origin.url` \
 			 --build-arg VCS_REF=$(GIT_COMMIT) \
 		 	 --build-arg ARCH=$(ARCH) \
-			 --build-arg FRAMEWORK_VERSION="v1.6.0"
-
-docker_build_gpu: # Build GPU Docker image
-	@docker build $(BUILD_ARGS) \
-		-f Dockerfile.$(ARCH)_gpu \
-		-t $(DOCKER_IMAGE):$(ARCH)-gpu-$(DOCKER_TAG) .
-docker_build_cpu:  # Build CPU Docker image
-	@docker build $(BUILD_ARGS) \
-		-f Dockerfile.$(ARCH)_cpu \
-		-t "$(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG)" .
+			 --build-arg FRAMEWORK_VERSION=$(ONNXRUNTIME_VERSION)
 
 docker_build: docker_build_cpu docker_build_gpu
 
-docker_push_cpu: # Tag image as latest and Push to DockerHub
-	docker tag $(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-cpu-latest
-	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-$(DOCKER_TAG)
-	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-latest
+docker_build_cpu: # Build CPU Docker image
+	@docker build $(BUILD_ARGS) \
+		-f Dockerfile.$(ARCH)_cpu_onnxruntime$(ONNXRUNTIME_VERSION) \
+		-t $(DOCKER_IMAGE):$(ARCH)-cpu-onnxruntime$(ONNXRUNTIME_VERSION)-$(DOCKER_TAG) .
+
+docker_build_gpu: # Build GPU Docker image
+	@docker build $(BUILD_ARGS) \
+		-f Dockerfile.$(ARCH)_gpu_onnxruntime$(ONNXRUNTIME_VERSION)_cuda$(CUDA_VERSION) \
+		-t $(DOCKER_IMAGE):$(ARCH)-gpu-onnxruntime$(ONNXRUNTIME_VERSION)-cuda$(CUDA_VERSION)-$(DOCKER_TAG) .
+
+docker_push_cpu: # Tag image as latest and Push to Dockerhub
+	docker tag $(DOCKER_IMAGE):$(ARCH)-cpu-onnxruntime$(ONNXRUNTIME_VERSION)-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-cpu-onnxruntime$(ONNXRUNTIME_VERSION)-latest
+	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-onnxruntime$(ONNXRUNTIME_VERSION)-$(DOCKER_TAG)
+	docker push $(DOCKER_IMAGE):$(ARCH)-cpu-onnxruntime$(ONNXRUNTIME_VERSION)-latest
 
 docker_push_gpu: # Tag image as latest and Push to DockerHub
-	docker tag $(DOCKER_IMAGE):$(ARCH)-gpu-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-gpu-latest
-	docker push $(DOCKER_IMAGE):$(ARCH)-gpu-$(DOCKER_TAG)
-	docker push $(DOCKER_IMAGE):$(ARCH)-gpu-latest
+	docker tag $(DOCKER_IMAGE):$(ARCH)-gpu-onnxruntime$(ONNXRUNTIME_VERSION)-cuda$(CUDA_VERSION)-$(DOCKER_TAG) $(DOCKER_IMAGE):$(ARCH)-gpu-onnxruntime$(ONNXRUNTIME_VERSION)-cuda$(CUDA_VERSION)-latest
+	docker push $(DOCKER_IMAGE):$(ARCH)-gpu-onnxruntime$(ONNXRUNTIME_VERSION)-cuda$(CUDA_VERSION)-$(DOCKER_TAG)
+	docker push $(DOCKER_IMAGE):$(ARCH)-gpu-onnxruntime$(ONNXRUNTIME_VERSION)-cuda$(CUDA_VERSION)-latest
 
 docker_push: docker_push_cpu docker_push_gpu
 

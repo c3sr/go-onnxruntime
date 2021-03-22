@@ -1,0 +1,58 @@
+FROM c3sr/base:amd64-cpu-go1.15-latest
+MAINTAINER Yen-Hsiang Chang <yhchang3@illinois.edu>
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
+ARG ARCH
+ARG ONNXRUNTIME_VERSION
+LABEL org.carml.go-onnxruntime.build-date=$BUILD_DATE \
+  org.carml.go-onnxruntime.name="go-onnxruntime bindings for go" \
+  org.carml.go-onnxruntime.description="" \
+  org.carml.go-onnxruntime.url="https://www.mlmodelscope.org/" \
+  org.carml.go-onnxruntime.vcs-ref=$VCS_REF \
+  org.carml.go-onnxruntime.vcs-url=$VCS_URL \
+  org.carml.go-onnxruntime.vendor="MLModelScope" \
+  org.carml.go-onnxruntime.arch=$ARCH \
+  org.carml.go-onnxruntime.version=$VERSION \
+  org.carml.go-onnxruntime.framework_version=$ONNXRUNTIME_VERSION \
+  org.carml.go-onnxruntime.schema-version="1.0"
+
+
+########## DEPENDENCIES INSTALLATION ###################
+
+RUN apt update && apt install -y --no-install-recommends \
+  gcc-8 \
+  g++-8 \
+  && \
+  rm -rf /var/lib/apt/lists/* && \
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-8 && \
+  gcc --version && \
+  g++ --version
+
+########## LIBRARY INSTALLATION ###################
+WORKDIR /
+
+# SOURCE INSTALLATION
+ARG BRANCH=v${ONNXRUNTIME_VERSION}
+
+RUN git clone --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
+  git submodule update --init && \
+  ./build.sh --config Release --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=${FRAMEWORKS_DIR}/onnxruntime/ && \
+  cd build/Linux/Release && \
+  make install
+
+RUN rm -fr onnxruntime
+
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${FRAMEWORKS_DIR}/onnxruntime/lib
+ENV LIBRARY_PATH ${LIBRARY_PATH}:${FRAMEWORKS_DIR}/onnxruntime/lib
+
+########## GO BINDING INSTALLATION ###################
+ENV PKG github.com/c3sr/go-onnxruntime
+WORKDIR /c3sr/go-onnxruntime
+
+RUN git clone --depth=1 --branch=master  https://${PKG}.git .
+
+RUN go install -a -tags=nogpu -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"

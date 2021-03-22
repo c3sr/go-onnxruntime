@@ -1,4 +1,4 @@
-FROM c3sr/base:amd64-gpu-latest
+FROM c3sr/base:amd64-gpu-go1.15-cuda11.2-latest
 MAINTAINER Yen-Hsiang Chang <yhchang3@illinois.edu>
 
 # Build-time metadata as defined at http://label-schema.org
@@ -7,7 +7,7 @@ ARG VCS_REF
 ARG VCS_URL
 ARG VERSION
 ARG ARCH
-ARG FRAMEWORK_VERSION
+ARG ONNXRUNTIME_VERSION
 LABEL org.carml.go-onnxruntime.build-date=$BUILD_DATE \
   org.carml.go-onnxruntime.name="go-onnxruntime bindings for go" \
   org.carml.go-onnxruntime.description="" \
@@ -17,55 +17,43 @@ LABEL org.carml.go-onnxruntime.build-date=$BUILD_DATE \
   org.carml.go-onnxruntime.vendor="MLModelScope" \
   org.carml.go-onnxruntime.arch=$ARCH \
   org.carml.go-onnxruntime.version=$VERSION \
-  org.carml.go-onnxruntime.framework_version=$FRAMEWORK_VERSION \
+  org.carml.go-onnxruntime.framework_version=$ONNXRUNTIME_VERSION \
   org.carml.go-onnxruntime.schema-version="1.0"
 
 
 ########## DEPENDENCIES INSTALLATION ###################
-ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  tzdata \
+RUN apt update && apt install -y --no-install-recommends \
   gcc-8 \
   g++-8 \
-  locales \
-  subversion \
   && \
   rm -rf /var/lib/apt/lists/* && \
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 80 --slave /usr/bin/g++ g++ /usr/bin/g++-8 && \
   gcc --version && \
   g++ --version
 
-RUN ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime && \
-  dpkg-reconfigure --frontend noninteractive tzdata
-
-RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
-
 ########## LIBRARY INSTALLATION ###################
 WORKDIR /
 
 # SOURCE INSTALLATION
-ARG BRANCH=v1.6.0
+ARG BRANCH=v${ONNXRUNTIME_VERSION}
 
-RUN git clone --single-branch --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
+RUN git clone --depth=1 --recurse-submodules --branch=${BRANCH} https://github.com/microsoft/onnxruntime.git && cd onnxruntime && \
   git submodule update --init && \
-  ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_cuda --config Release --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=/opt/onnxruntime/ --update --build && \
+  ./build.sh --cuda_home /usr/local/cuda --cudnn_home /usr/lib/x86_64-linux-gnu/ --use_cuda --config Release --build_shared_lib --parallel --cmake_extra_defines CMAKE_INSTALL_PREFIX=${FRAMEWORKS_DIR}/onnxruntime/ --update --build && \
   cd build/Linux/Release && \
   make install
 
-RUN cd / && rm -fr onnxruntime
+RUN rm -fr onnxruntime
 
-ENV LD_LIBRARY_PATH /opt/onnxruntime/lib:${LD_LIBRARY_PATH}
-ENV LIBRARY_PATH /opt/onnxruntime/lib:${LIBRARY_PATH}
+ENV LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${FRAMEWORKS_DIR}/onnxruntime/lib
+ENV LIBRARY_PATH ${LIBRARY_PATH}:${FRAMEWORKS_DIR}/onnxruntime/lib
 
 ########## GO BINDING INSTALLATION ###################
 ENV PKG github.com/c3sr/go-onnxruntime
-WORKDIR $GOPATH/src/$PKG
+WORKDIR /c3sr/go-onnxruntime
 
-RUN git clone --depth=1 --single-branch --branch=master  https://${PKG}.git .
-
-RUN dep ensure -v -vendor-only
+RUN git clone --depth=1 --branch=master  https://${PKG}.git .
 
 RUN go install -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"
 
-RUN rm -fr vendor
