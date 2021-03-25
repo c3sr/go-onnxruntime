@@ -12,16 +12,6 @@ jobs:
       - script: ONNXRUNTIME_VERSION=1.7.1 ./push.sh docker_push_cpu
         workingDirectory: dockerfiles
         condition: eq(variables.isMain, true)
-  - job: GPU_ORT_1_7_1_CUDA100
-    timeoutInMinutes: 0
-    steps:
-      - script: docker login -u $(DOCKER_USERNAME) -p $(DOCKER_PASSWORD)
-        condition: eq(variables.isMain, true)
-      - script: ONNXRUNTIME_VERSION=1.7.1 CUDA_VERSION=10.0 make docker_build_gpu
-        workingDirectory: dockerfiles
-      - script: ONNXRUNTIME_VERSION=1.7.1 CUDA_VERSION=10.0 ./push.sh docker_push_gpu
-        workingDirectory: dockerfiles
-        condition: eq(variables.isMain, true)
   - job: GPU_ORT_1_7_1_CUDA101
     timeoutInMinutes: 0
     steps:
