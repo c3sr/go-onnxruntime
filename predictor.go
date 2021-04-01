@@ -165,7 +165,7 @@ func (p *Predictor) Close() {
 		return
 	}
 
-	if p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
+	if p.ctx != nil && p.options.TraceLevel() >= tracer.FRAMEWORK_TRACE {
 		C.ORT_EndProfiling(p.ctx)
 		start_time := int64(C.ORT_ProfilingGetStartTime(p.ctx))
 
