@@ -156,11 +156,14 @@ github.com/c3sr/cpu v1.0.0/go.mod h1:VEoMcqKAF+EPzYLm3qOemn+b4z+gPr2phh7TJl7bFsI
 github.com/c3sr/database v1.0.0/go.mod h1:WpseZN/vRDAj+RLC4ZEPLFjU/ZRLAGqGQHrOPWeKbEY=
 github.com/c3sr/dlframework v1.0.2 h1:Ncy81Q42QCg7I8YZSk3kgtifWubXRfrzXDBhMYKIb5o=
 github.com/c3sr/dlframework v1.0.2/go.mod h1:ztNqpWuH9Z0CmryNCGiTTALVWfLhzXI1d7d8xp48cn0=
+github.com/c3sr/dlframework v1.2.0 h1:PdOgRa5Mog1LGbPHDJFwF39uc0NTGDWlRNuj17NDu6c=
+github.com/c3sr/dlframework v1.2.0/go.mod h1:0JeraG4b0xvgyd0EkMn44zwcR3LyaX6xkSi3MTg4X40=
 github.com/c3sr/downloadmanager v1.0.0/go.mod h1:YqQ+Ps7QIjsu0vZ5DQekJfsZ5ferSd1r4Rr4wG6RmwI=
 github.com/c3sr/go-cupti v1.0.1 h1:TW4U/uhw/kdTw+cMs5Yf/QmZVB8hS096hWLWybYddps=
 github.com/c3sr/go-cupti v1.0.1/go.mod h1:Rtvs8Llguhs70qohmGj2Ej+SKT+lQ4L34h5vbSQZZW0=
 github.com/c3sr/go-libjpeg v1.0.0 h1:QDFW7Q5N7NimN/sV9u0t4o9573vgst1PE+DPBBxkMHU=
 github.com/c3sr/go-libjpeg v1.0.0/go.mod h1:PXgijZrloxWoBavtXsIeRBR37r6LXA7RN0N51EnPgtU=
+github.com/c3sr/go-python3 v0.0.0-20210424014611-ae173b2e6908/go.mod h1:6rv4k8m/sCXIMEXPHGC5hG1Cgsl/mylZ5rbdhVfaoGQ=
 github.com/c3sr/grpc v1.0.0/go.mod h1:odSfiDfxpwmzRVgl1dodi8e8ZObNqbddBXK4zgrDVgI=
 github.com/c3sr/image v1.0.0 h1:THtS/yEDiHE3wqMxGaG7YDLjjDFi7RahHMDz8lJh8O0=
 github.com/c3sr/image v1.0.0/go.mod h1:NM82s6vaB2b9urcBJXx6Pdm6jFicfhBF3RM8b5ie8Ac=
