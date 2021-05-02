@@ -160,6 +160,8 @@ github.com/c3sr/dlframework v1.2.0 h1:PdOgRa5Mog1LGbPHDJFwF39uc0NTGDWlRNuj17NDu6
 github.com/c3sr/dlframework v1.2.0/go.mod h1:0JeraG4b0xvgyd0EkMn44zwcR3LyaX6xkSi3MTg4X40=
 github.com/c3sr/dlframework v1.2.1 h1:htGklIFnZAMy4XxsHlJsxNdAzP/iDjZCGjgHC4DMiso=
 github.com/c3sr/dlframework v1.2.1/go.mod h1:0JeraG4b0xvgyd0EkMn44zwcR3LyaX6xkSi3MTg4X40=
+github.com/c3sr/dlframework v1.2.2 h1:zyIhEVKVSxBX2mBBoWULcoug8rNt+VwOUWKKCe6DvtU=
+github.com/c3sr/dlframework v1.2.2/go.mod h1:0JeraG4b0xvgyd0EkMn44zwcR3LyaX6xkSi3MTg4X40=
 github.com/c3sr/downloadmanager v1.0.0/go.mod h1:YqQ+Ps7QIjsu0vZ5DQekJfsZ5ferSd1r4Rr4wG6RmwI=
 github.com/c3sr/go-cupti v1.0.1 h1:TW4U/uhw/kdTw+cMs5Yf/QmZVB8hS096hWLWybYddps=
 github.com/c3sr/go-cupti v1.0.1/go.mod h1:Rtvs8Llguhs70qohmGj2Ej+SKT+lQ4L34h5vbSQZZW0=
