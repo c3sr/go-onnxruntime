@@ -13,7 +13,7 @@ require (
 	github.com/GeertJohan/go-sourcepath v0.0.0-20150925135350-83e8b8723a9b
 	github.com/benesch/cgosymbolizer v0.0.0-20190515212042-bec6fe6e597b
 	github.com/c3sr/config v1.0.1
-	github.com/c3sr/dlframework v1.2.2
+	github.com/c3sr/dlframework v1.3.1
 	github.com/c3sr/go-cupti v1.0.1
 	github.com/c3sr/image v1.0.0
 	github.com/c3sr/logger v1.0.1
