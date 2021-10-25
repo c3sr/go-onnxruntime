@@ -23,7 +23,7 @@ using std::string;
  * Note: Call ConvertOutput before you want to read the outputs
  */ 
 struct Predictor {
-  Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace);
+  Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace, int device_id);
   ~Predictor();
   void Predict(void);
   void ConvertOutput(void);
@@ -37,7 +37,7 @@ struct Predictor {
     /* Description: Follow the sample given in onnxruntime to initialize the environment
      * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
      */
-    Onnxruntime_Env(ORT_DeviceKind device, bool enable_trace) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
+    Onnxruntime_Env(ORT_DeviceKind device, bool enable_trace, int device_id) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
       // Initialize environment, could use ORT_LOGGING_LEVEL_VERBOSE to get more information
       // NOTE: Only one instance of env can exist at any point in time
       
@@ -47,7 +47,7 @@ struct Predictor {
       
       #ifdef ORT_WITH_GPU
       if (device == CUDA_DEVICE_KIND) {
-        OrtSessionOptionsAppendExecutionProvider_CUDA(session_options_, 0 /* device id */);
+        OrtSessionOptionsAppendExecutionProvider_CUDA(session_options_, device_id /* device id */);
       }
       #endif
 
@@ -76,8 +76,8 @@ struct Predictor {
 /* Description: Follow the sample given in onnxruntime to initialize the predictor
  * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
  */
-Predictor::Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace)
-  : ort_env_(device, enable_trace), 
+Predictor::Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace, int device_id)
+  : ort_env_(device, enable_trace, device_id), 
     session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_),
     enable_trace_(enable_trace) {
 
@@ -240,9 +240,9 @@ void ORT_EndProfiling(ORT_PredictorContext pred) {
 }
 
 /* Description: The interface for Go to create a new predictor */
-ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace) {
+ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace, int device_id) {
   HANDLE_ORT_ERRORS(ORT_GlobalError);
-  const auto ctx = new Predictor(model_file, device, enable_trace);
+  const auto ctx = new Predictor(model_file, device, enable_trace, device_id);
   return (ORT_PredictorContext) ctx;
   END_HANDLE_ORT_ERRORS(ORT_GlobalError, (ORT_PredictorContext) nullptr);
 }

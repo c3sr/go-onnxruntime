@@ -51,8 +51,10 @@ func New(ctx context.Context, opts ...options.Option) (*Predictor, error) {
 	cModelFile := C.CString(modelFile)
 	defer C.free(unsafe.Pointer(cModelFile))
 
+	deviceID := options.Devices()[0].ID()
+
 	pred := &Predictor{
-		ctx:     C.ORT_NewPredictor(cModelFile, C.ORT_DeviceKind(device), C.bool(options.TraceLevel() >= tracer.FRAMEWORK_TRACE)),
+		ctx:     C.ORT_NewPredictor(cModelFile, C.ORT_DeviceKind(device), C.bool(options.TraceLevel() >= tracer.FRAMEWORK_TRACE), C.int(deviceID),),
 		options: options,
 	}
 

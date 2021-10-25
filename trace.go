@@ -88,7 +88,7 @@ func NewTrace(data string, start_time int64) (*Trace, error) {
 
 func (event *TraceEvent) Publish(ctx context.Context, lvl tracer.Level, opts ...opentracing.StartSpanOption) error {
 	// skip the events for loading model and setting environments in onnxruntime
-	if event.Name == "model_loading_from_uri" || event.Name == "session_initialization" {
+	if event.Name == "model_loading_from_uri" || event.Name == "session_initialization" || event.Name == "model_run" || event.Name == "SequentialExecutor::Execute" {
 		return nil
 	}
 

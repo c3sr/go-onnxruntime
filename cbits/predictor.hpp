@@ -28,7 +28,7 @@ extern "C" {
 
   // Predictor + Profiling interface for Go
 
-  ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace);
+  ORT_PredictorContext ORT_NewPredictor(const char *model_file, ORT_DeviceKind device, bool enable_trace, int device_id);
 
   void ORT_PredictorClear(ORT_PredictorContext pred);
 
