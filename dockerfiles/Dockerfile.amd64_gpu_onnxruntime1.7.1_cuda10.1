@@ -55,5 +55,7 @@ WORKDIR /c3sr/go-onnxruntime
 
 RUN git clone --depth=1 --branch=master  https://${PKG}.git .
 
+RUN go get github.com/c3sr/go-cupti@cuda10
+
 RUN go install -a -installsuffix cgo -ldflags "-s -w -X ${PKG}/Version=${VERSION} -X ${PKG}/GitCommit=${VCS_REF} -X ${PKG}/BuildDate=${BUILD_DATE}"
 
