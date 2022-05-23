@@ -178,6 +178,9 @@ void *Predictor::ConvertTensorToPointer(Ort::Value& value, size_t size) {
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
       res = (void*) malloc(sizeof(uint64_t) * size);
       memcpy(res, value.GetTensorMutableData<uint64_t>(), sizeof(uint64_t) * size);
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+      res = (void*) malloc(sizeof(std::string) * size);
+      memcpy(res, value.GetTensorMutableData<std::string>(), sizeof(std::string) * size);
     break;
     default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
       throw std::runtime_error(std::string("unsupported data type detected in Predictor::ConvertTensorToPointer."));
@@ -419,6 +422,9 @@ void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
     break;
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
       (predictor -> input_).emplace_back(Ort::Value::CreateTensor<uint64_t>(memory_info, static_cast<uint64_t*>(input) , size, dims.data(), dims.size()));
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+      (predictor -> input_).emplace_back(Ort::Value::CreateTensor<std::string>(memory_info, static_cast<std::string*>(input) , size, dims.data(), dims.size()));
     break;
     default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
       throw std::runtime_error(std::string("unsupported data type detected in ORT_AddInput."));
