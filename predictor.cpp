@@ -21,7 +21,7 @@ using std::string;
 
 /* Description: The structure to handle the predictor for onnxruntime
  * Note: Call ConvertOutput before you want to read the outputs
- */ 
+ */
 struct Predictor {
   Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace, int device_id);
   ~Predictor();
@@ -40,11 +40,11 @@ struct Predictor {
     Onnxruntime_Env(ORT_DeviceKind device, bool enable_trace, int device_id) : env_(ORT_LOGGING_LEVEL_ERROR, "ort_predict") {
       // Initialize environment, could use ORT_LOGGING_LEVEL_VERBOSE to get more information
       // NOTE: Only one instance of env can exist at any point in time
-      
+
       // enable profiling, the argument is the prefix you want for the file
       if(enable_trace)
       	session_options_.EnableProfiling("onnxruntime");
-      
+
       #ifdef ORT_WITH_GPU
       if (device == CUDA_DEVICE_KIND) {
         OrtSessionOptionsAppendExecutionProvider_CUDA(session_options_, device_id /* device id */);
@@ -77,7 +77,7 @@ struct Predictor {
  * Referenced: https://github.com/microsoft/onnxruntime/blob/master/csharp/test/Microsoft.ML.OnnxRuntime.EndToEndTests.Capi/CXX_Api_Sample.cpp
  */
 Predictor::Predictor(const string &model_file, ORT_DeviceKind device, bool enable_trace, int device_id)
-  : ort_env_(device, enable_trace, device_id), 
+  : ort_env_(device, enable_trace, device_id),
     session_(ort_env_.env_, model_file.c_str(), ort_env_.session_options_),
     enable_trace_(enable_trace) {
 
@@ -178,6 +178,9 @@ void *Predictor::ConvertTensorToPointer(Ort::Value& value, size_t size) {
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
       res = (void*) malloc(sizeof(uint64_t) * size);
       memcpy(res, value.GetTensorMutableData<uint64_t>(), sizeof(uint64_t) * size);
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+      res = (void*) malloc(sizeof(std::string) * size);
+      memcpy(res, value.GetTensorMutableData<std::string>(), sizeof(std::string) * size);
     break;
     default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
       throw std::runtime_error(std::string("unsupported data type detected in Predictor::ConvertTensorToPointer."));
@@ -207,7 +210,7 @@ void Predictor::AddOutput(Ort::Value& value) {
     });
     return;
   }
-  
+
   // need to be decomposed, it is a map or a sequence, both can be done in the same way
   size_t length = value.GetCount();
 
@@ -330,7 +333,7 @@ char *ORT_ProfilingRead(ORT_PredictorContext pred) {
   if (predictor == nullptr) {
     throw std::runtime_error(std::string("Invalid pointer to the predictor in ORT_ProfilingRead."));
   }
-  
+
   std::stringstream ss;
   std::ifstream in(predictor -> profile_filename_);
   ss << in.rdbuf();
@@ -349,7 +352,7 @@ static int64_t Getoffset(void) {
 	system_clock::time_point t2 = system_clock::now();
 	system_clock::time_point t3 = system_clock::now();
 	high_resolution_clock::time_point t4 = high_resolution_clock::now();
-	return (static_cast<int64_t>(duration_cast<nanoseconds>(t2.time_since_epoch()).count()) 
+	return (static_cast<int64_t>(duration_cast<nanoseconds>(t2.time_since_epoch()).count())
 	      - static_cast<int64_t>(duration_cast<nanoseconds>(t1.time_since_epoch()).count())
 	      + static_cast<int64_t>(duration_cast<nanoseconds>(t3.time_since_epoch()).count())
 	      - static_cast<int64_t>(duration_cast<nanoseconds>(t4.time_since_epoch()).count())) / 2;
@@ -419,6 +422,9 @@ void ORT_AddInput(ORT_PredictorContext pred, void *input, int64_t *dimensions,
     break;
     case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64:
       (predictor -> input_).emplace_back(Ort::Value::CreateTensor<uint64_t>(memory_info, static_cast<uint64_t*>(input) , size, dims.data(), dims.size()));
+    break;
+    case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING:
+      (predictor -> input_).emplace_back(Ort::Value::CreateTensor<std::string>(memory_info, static_cast<std::string*>(input) , size, dims.data(), dims.size()));
     break;
     default: // c++: FLOAT16; onnxruntime: COMPLEX64, COMPLEX128, BFLOAT16; TODO: Implement String method
       throw std::runtime_error(std::string("unsupported data type detected in ORT_AddInput."));
